@@ -61,3 +61,11 @@ def update_customer(customer_id):
     return jsonify({"message": "user updated"})
 
 
+# Database is validating category_id is an integer between 100 and 999.
+@app.route ("/item_categories", methods = ["POST"])
+def create_category():
+    category = request.get_json()
+    db.execute("INSERT INTO item_categories (id, description) VALUES (?, ?)", category["id"], category["description"].upper())
+    return jsonify({"message": "item_category created"})
+
+
