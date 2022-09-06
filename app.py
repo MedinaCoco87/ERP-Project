@@ -51,3 +51,13 @@ def create_customer():
                 )
     return jsonify({"message": "customer created"})
 
+
+@app.route ("/customers/<customer_id>", methods = ["PUT"])
+def update_customer(customer_id):
+    customer_new_data = request.get_json()
+    for key in customer_new_data:
+        db.execute("UPDATE customers SET ? = ? WHERE id = ?", key, customer_new_data[key], customer_id)
+
+    return jsonify({"message": "user updated"})
+
+
