@@ -1,0 +1,136 @@
+TABLAS ERP
+
+CREATE TABLE users (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT NOT NULL UNIQUE,
+hashed_pass TEXT NOT NULL,
+profile TEXT NOT NULL,
+status TEXT NOT NULL)
+
+SQL* CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, hashed_pass TEXT NOT NULL, profile TEXT NOT NULL, status TEXT NOT NULL);
+
+CREATE TABLE customers (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+company_name TEXT NOT NULL,
+tax_id TEXT UNIQUE,
+address_street TEXT NOT NULL,
+address_city TEXT NOT NULL,
+address_country TEXT NOT NULL,
+payment_condition TEXT NOT NULL,
+credit_line FLOAT NOT NULL,
+available_credit FLOAT NOT NULL)
+
+SQL* CREATE TABLE customers (id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT NOT NULL, tax_id TEXT UNIQUE, address_street TEXT NOT NULL, address_city TEXT NOT NULL, address_country TEXT NOT NULL, payment_condition TEXT NOT NULL, credit_line FLOAT NOT NULL, available_credit FLOAT)
+
+CREATE TABLE item_categories (
+id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+description TEXT NOT NULL UNIQUE,
+CHECK (id >= 100 AND id <= 999))
+
+SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, CHECK (id >= 100 AND id <= 999));
+
+CREATE TABLE items (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+description TEXT NOT NULL,
+full_description TEXT,
+um INTEGER NOT NULL,
+category_id INTEGER NOT NULL,
+status TEXT NOT NULL,
+FOREIGN KEY (category_id) REFERENCES item_categories (id))
+
+*SQL* CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT NOT NULL, full_description TEXT, um INTEGER NOT NULL, category_id INTEGER NOT NULL, status TEXT NOT NULL, FOREIGN KEY (category_id) REFERENCES item_categories (id));
+
+*SQL* ALTER TABLE items ADD status TEXT NOT NULL;
+
+CREATE TABLE stock (
+item_id INTEGER NOT NULL UNIQUE,
+total_stock INTEGER,
+stock_a INTEGER,
+stock_q INTEGER,
+stock_r INTEGER,
+stock_onsale INTEGER,
+stock_incoming INTEGER,
+FOREIGN KEY (item_id) REFERENCES items (id))
+
+*SQL* CREATE TABLE stock (item_id INTEGER NOT NULL UNIQUE, total_stock INTEGER, stock_a INTEGER, stock_q INTEGER, stock_r INTEGER, stock_onsale INTEGER, stock_incoming INTEGER, FOREIGN KEY (item_id) REFERENCES items (id));
+
+CREATE TABLE stock_moves (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+date DATE NOT NULL,
+item_id INTEGER NOT NULL,
+quantity INTEGER NOT NULL,
+move_reference TEXT NOT NULL,
+customer_id INTEGER,
+user_id INTEGER NOT NULL,
+FOREIGN KEY (item_id) REFERENCES items (id),
+FOREIGN KEY (customer_id) REFERENCES customers (id))
+
+*SQL* CREATE TABLE stock_moves (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, move_reference TEXT NOT NULL, customer_id INTEGER, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id), FOREIGN KEY (customer_id) REFERENCES customers (id));
+
+CREATE TABLE quotes (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+date DATE NOT NULL,
+customer_id INTEGER,
+item_id INTEGER NOT NULL,
+quantity INTEGER NOT NULL,
+list_price FLOAT NOT NULL,
+discount FLOAT,
+lead_time INTEGER NOT NULL,
+status TEXT,
+user_id INTEGER NOT NULL,
+FOREIGN KEY (item_id) REFERENCES items (id),
+FOREIGN KEY (customer_id) REFERENCES customers (id)
+FOREIGN KEY (user_id) REFERENCES users (id))
+
+*SQL* CREATE TABLE quotes (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL, customer_id INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT NOT NULL, discount FLOAT, lead_time INTEGER NOT NULL, status TEXT, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id), FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (user_id) REFERENCES users (id));
+
+CREATE TABLE sales_orders (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+date DATE NOT NULL,
+customer_id INTEGER,
+quote_id INTEGER NOT NULL,
+item_id INTEGER NOT NULL,
+quantity INTEGER NOT NULL,
+list_price FLOAT NOT NULL,
+discount FLOAT,
+delivery_date DATE NOT NULL,
+status TEXT,
+user_id INTEGER NOT NULL,
+FOREIGN KEY (item_id) REFERENCES items (id),
+FOREIGN KEY (customer_id) REFERENCES customers (id)
+FOREIGN KEY (user_id) REFERENCES users (id)
+FOREIGN KEY (quote_id) REFERENCES quotes (id))
+
+*SQL* CREATE TABLE sales_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL, customer_id INTEGER, quote_id INTEGER NOT NULL, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT NOT NULL, discount FLOAT, delivery_date DATE NOT NULL, status TEXT, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id), FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (user_id) REFERENCES users (id), FOREIGN KEY (quote_id) REFERENCES quotes (id));
+
+CREATE TABLE invoices (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+date DATETIME NOT NULL,
+customer_id INTEGER,
+sales_order_id INTEGER NOT NULL,
+item_id INTEGER NOT NULL,
+quantity INTEGER NOT NULL,
+net_price FLOAT NOT NULL,
+tax_amount FLOAT,
+status TEXT NOT NULL,
+user_id INTEGER NOT NULL,
+FOREIGN KEY (item_id) REFERENCES items (id),
+FOREIGN KEY (customer_id) REFERENCES customers (id)
+FOREIGN KEY (user_id) REFERENCES users (id)
+FOREIGN KEY (sales_orders_id) REFERENCES sales_orders (id))
+
+CREATE TABLE invoices (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATETIME NOT NULL, customer_id INTEGER, sales_order_id INTEGER NOT NULL, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT, status TEXT NOT NULL, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id), FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (user_id) REFERENCES users (id), FOREIGN KEY (sales_order_id) REFERENCES sales_orders (id));
+
+-- Update tables add foreign keys to improve relations --
+
+*SQL* DROP TABLE item_categories;
+*SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, created_by TEXT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
+
+*SQL* DROP TABLE customers;
+*SQL* CREATE TABLE customers (id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT NOT NULL, tax_id TEXT UNIQUE, address_street TEXT NOT NULL, address_city TEXT NOT NULL, address_country TEXT NOT NULL, payment_condition TEXT NOT NULL, credit_line FLOAT DEFAULT 10000, available_credit FLOAT DEFAULT 10000, created_by TEXT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL, CHECK (available_credit <= credit_line));
+
+*SQL* DROP TABLE items;
+*SQL* CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT NOT NULL, full_description TEXT, um TEXT NOT NULL DEFAULT UN, category_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT active, created_by TEXT, FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL);
+
+*SQL* DROP TABLE stock;
+*SQL* CREATE TABLE stock (category_id INTEGER NOT NULL, item_id INTEGER NOT NULL UNIQUE, total_stock INTEGER, stock_a INTEGER, stock_q INTEGER, stock_r INTEGER, stock_onsale INTEGER, stock_incoming INTEGER, FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
