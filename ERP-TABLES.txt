@@ -127,7 +127,7 @@ CREATE TABLE invoices (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATETIME NOT N
 *SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, created_by TEXT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
 
 *SQL* DROP TABLE customers;
-*SQL* CREATE TABLE customers (id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT NOT NULL, tax_id TEXT UNIQUE, address_street TEXT NOT NULL, address_city TEXT NOT NULL, address_country TEXT NOT NULL, payment_condition TEXT NOT NULL, credit_line FLOAT DEFAULT 10000, available_credit FLOAT DEFAULT 10000, created_by TEXT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL, CHECK (available_credit <= credit_line));
+*SQL* CREATE TABLE customers (id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT NOT NULL, tax_id TEXT UNIQUE, address_street TEXT NOT NULL, address_city TEXT NOT NULL, address_country TEXT NOT NULL, payment_condition TEXT NOT NULL, credit_line FLOAT DEFAULT 10000, available_credit FLOAT DEFAULT 10000, created_by TEXT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, CHECK (available_credit <= credit_line));
 
 *SQL* DROP TABLE items;
 *SQL* CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT NOT NULL, full_description TEXT, um TEXT NOT NULL DEFAULT UN, category_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT active, created_by TEXT, FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL);

@@ -45,13 +45,7 @@ def get_user_by_id(user_id):
 @app.route ("/customers", methods = ["POST"])
 def create_customer():
     customer = request.get_json()
-    db.execute(
-        "INSERT INTO customers (company_name, tax_id, address_street, address_city, \
-                address_country, payment_condition, credit_line) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                customer["company_name"], customer["tax_id"], customer["address_street"], 
-                customer["address_city"], customer["address_country"], customer["payment_condition"],
-                customer["credit_line"]
-                )
+    db.execute("INSERT INTO customers (company_name, tax_id, address_street, address_city, address_country, payment_condition, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)", customer["company_name"], customer["tax_id"], customer["address_street"], customer["address_city"], customer["address_country"], customer["payment_condition"], customer["created_by"])
     return jsonify({"message": "customer created"})
 
 
@@ -62,6 +56,7 @@ def update_customer(customer_id):
         db.execute("UPDATE customers SET ? = ? WHERE id = ?", key, customer_new_data[key], customer_id)
 
     return jsonify({"message": "user updated"}), 200
+
 
 @app.route("/customers/<customer_id>", methods = ["GET"])
 def get_customer_by_id(customer_id):
@@ -91,7 +86,7 @@ def get_customers_by_name():
 @app.route ("/item_categories", methods = ["POST"])
 def create_category():
     category = request.get_json()
-    db.execute("INSERT INTO item_categories (id, description) VALUES (?, ?)", category["id"], category["description"].upper())
+    db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", category["id"], category["description"].upper(), category["created_by"])
     return jsonify({"message": "item_category created"})
 
 
