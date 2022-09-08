@@ -134,3 +134,99 @@ CREATE TABLE invoices (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATETIME NOT N
 
 *SQL* DROP TABLE stock;
 *SQL* CREATE TABLE stock (category_id INTEGER NOT NULL, item_id INTEGER NOT NULL UNIQUE, total_stock INTEGER, stock_a INTEGER, stock_q INTEGER, stock_r INTEGER, stock_onsale INTEGER, stock_incoming INTEGER, FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
+
+*SQL* DROP TABLE stock_moves;
+*SQL* CREATE TABLE stock_moves (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, category_id INTEGER NOT NULL, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, move_reference TEXT NOT NULL, customer_id INTEGER, invoice_id INTEGER, sales_order_id INTEGER, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE CASCADE, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE, FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE, FOREIGN KEY (sales_order_id) REFERENCES sales_orders (id) ON DELETE CASCADE);
+
+*SQL* DROP TABLE quotes;
+
+CREATE TABLE quotes_headers (
+    quote_num INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    date DATE DEFAULT CURRENT_DATE,
+    total_net_value FLOAT NOT NULL,
+    created_by TEXT NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (id),
+    FOREIGN KEY (created_by) REFERENCES users (username))
+
+*SQL* CREATE TABLE quotes_headers (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT NOT NULL, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
+
+CREATE TABLE quotes_bodies (
+    quote_num INTEGER NOT NULL,
+    line_ref INTEGER,
+    item_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    list_price FLOAT,
+    discounts FLOAT,
+    lead_time INT NOT NULL,
+    status TEXT NOT NULL DEFAULT PENDING,
+    FOREIGN KEY (quote_num) REFERENCES quotes_headers (quote_num) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT,
+    CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1) 
+)
+
+*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discounts FLOAT, line_net_total FLOAT, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, FOREIGN KEY (quote_num) REFERENCES quotes_headers (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1));
+
+*SQL* DROP TABLE sales_orders;
+
+CREATE TABLE sorder_header (
+    order_num INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    customer_id INTEGER NOT NULL,
+    total_net_value FLOAT NOT NULL,
+    status TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by) REFERENCES users (username)
+)
+
+*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT NOT NULL, status TEXT NOT NULL, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
+
+CREATE TABLE sorder_body (
+    order_num INTEGER NOT NULL,
+    line_ref INTEGER,
+    item_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    net_price FLOAT NOT NULL,
+    delivery_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT PENDING,
+    quote_num INTEGER,
+    FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
+)
+
+*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
+
+*SQL* DROP TABLE invoices
+
+CREATE TABLE invoice_header (
+    invoice_num INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE DEFAULT CURRENT_DATE,
+    customer_id INTEGER NOT NULL,
+    total_net_value FLOAT NOT NULL,
+    total_tax_amount FLOAT,
+    payment_terms TEXT DEFAULT COD,
+    due_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT UNPAID,
+    created_by TEXT NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE RESTRICT
+)
+
+*SQL* CREATE TABLE invoice_header (invoice_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT NOT NULL, total_tax_amount FLOAT, payment_terms TEXT DEFAULT COD, due_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT UNPAID, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE RESTRICT);
+
+CREATE TABLE invoice_body (
+    invoice_num INTEGER NOT NULL,
+    line_ref INTEGER,
+    sorder_num INTEGER,
+    item_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    net_price FLOAT NOT NULL,
+    tax_amount FLOAT NOT NULL,
+    FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE,
+    FOREIGN KEY (sorder_num) REFERENCES sorder_body (order_num) ON DELETE RESTRICT,
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT,
+    CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0)
+)
+
+*SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_body (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));
