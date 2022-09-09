@@ -95,6 +95,8 @@ def create_item():
     item = request.get_json()
     # Identify the category for the new item and get the category full row from its table.
     item_category_row = db.execute("SELECT * FROM item_categories WHERE id = ?", item["category_id"])
+    if not item_category_row:
+        return jsonify({"message": "invalid category"}), 400
     # Get the counter from the category
     category_counter = item_category_row[0]["counter"]
     # Generate the item_id by concatenating category_id + category_id_counter
