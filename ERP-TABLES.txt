@@ -124,7 +124,7 @@ CREATE TABLE invoices (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATETIME NOT N
 -- Update tables add foreign keys to improve relations --
 
 *SQL* DROP TABLE item_categories;
-*SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, created_by TEXT, FOREIGN KEY (created_by) REFERENCES user (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
+*SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, created_by TEXT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
 
 *SQL* DROP TABLE customers;
 *SQL* CREATE TABLE customers (id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT NOT NULL, tax_id TEXT UNIQUE, address_street TEXT NOT NULL, address_city TEXT NOT NULL, address_country TEXT NOT NULL, payment_condition TEXT NOT NULL, credit_line FLOAT DEFAULT 10000, available_credit FLOAT DEFAULT 10000, created_by TEXT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, CHECK (available_credit <= credit_line));
@@ -230,3 +230,11 @@ CREATE TABLE invoice_body (
 )
 
 *SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_body (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));
+
+CREATE TABLE item_categories (
+    id INTEGER PRIMARY KEY NOT NULL UNIQUE, 
+    description TEXT NOT NULL UNIQUE,
+    counter INTEGER DEFAULT 1,
+    created_by TEXT, 
+    FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, 
+    CHECK (id >= 100 AND id <= 999));
