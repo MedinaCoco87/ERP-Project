@@ -82,12 +82,29 @@ def get_customers_by_name():
             return jsonify(all_customers), 200
 
 
+
 # Database is validating category_id is an integer between 100 and 999.
 @app.route ("/item_categories", methods = ["POST"])
 def create_category():
     category = request.get_json()
     db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", category["id"], category["description"].upper(), category["created_by"])
     return jsonify({"message": "item_category created"})
+
+
+@app.route ("/category_by_id/<item_category>", methods = ["GET"])
+def get_category(item_category):
+    category = db.execute("SELECT * FROM item_categories WHERE id = ?", item_category)
+    return jsonify(category), 200
+
+@app.route ("/get_all_categories", methods = ["GET"])
+def get_all_categories():
+    categories = db.execute("SELECT * FROM item_categories")
+    if not categories:
+        return jsonify({"message": "there are no records in categories yet"}), 400
+    return jsonify(categories), 200
+
+
+
 
 @app.route ("/items", methods = ["POST"])
 def create_item():
@@ -107,6 +124,22 @@ def create_item():
     category_counter = category_counter + 1
     db.execute("UPDATE item_categories SET counter = ? WHERE id = ?", category_counter, item["category_id"])
     return jsonify({"message": "item created", "item": item_id}), 200
+
+
+@app.route ("/items/<item_id>", methods = ["GET"])
+def get_item_by_id(item_id):
+    item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
+    if not item:
+        return jsonify({"messagge": "item not found"}), 400
+    return jsonify(item), 200
+
+
+@app.route ("/items_by_category/<category_id>", methods = ["GET"])
+def get_items_by_category(category_id):
+    items = db.execute("SELECT * FROM items WHERE category_id = ?", category_id)
+    if not items:
+        return jsonify({"message": "this category is empty"}), 400
+    return jsonify(items), 200
 
 
 
