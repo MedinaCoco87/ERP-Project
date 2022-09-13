@@ -173,14 +173,14 @@ CREATE TABLE sorder_header (
     order_num INTEGER PRIMARY KEY AUTOINCREMENT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     customer_id INTEGER NOT NULL,
-    total_net_value FLOAT NOT NULL,
-    status TEXT NOT NULL,
+    total_net_value FLOAT,
+    status TEXT DEFAULT PENDING,
     created_by TEXT NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT,
     FOREIGN KEY (created_by) REFERENCES users (username)
 )
 
-*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT NOT NULL, status TEXT NOT NULL, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
+*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
 
 CREATE TABLE sorder_body (
     order_num INTEGER NOT NULL,
