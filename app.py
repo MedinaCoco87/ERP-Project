@@ -126,6 +126,7 @@ def create_item():
     return jsonify({"message": "item created", "item": item_id}), 200
 
 
+
 @app.route ("/items/<item_id>", methods = ["GET"])
 def get_item_by_id(item_id):
     item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
@@ -134,12 +135,16 @@ def get_item_by_id(item_id):
     return jsonify(item), 200
 
 
+
+
 @app.route ("/items_by_category/<category_id>", methods = ["GET"])
 def get_items_by_category(category_id):
     items = db.execute("SELECT * FROM items WHERE category_id = ?", category_id)
     if not items:
         return jsonify({"message": "this category is empty"}), 400
     return jsonify(items), 200
+
+
 
 @app.route ("/create_quote", methods = ["POST"])
 def create_quote():
@@ -165,7 +170,6 @@ def create_quote():
     full_net_total = db.execute(
         "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?", quote_number,
     )
-    print(full_net_total)
     db.execute(
         "UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
         full_net_total[0]["SUM(line_net_total)"], quote_number
@@ -174,7 +178,60 @@ def create_quote():
 
 
 
+@app.route("/get_all_quotes", methods = ["GET"])
+def get_all_quotes():
+    quote_headers = db.execute("SELECT * FROM quote_header")
+    # Get me an empty list to store all the quotes as dictionaries
+    quotes = []
+    # For each quote_num in header, get me all the body rows with that same quote_num
+    for i in range(len(quote_headers)):
+        quote_body = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_headers[i]["quote_num"])
+        quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
+    return jsonify(quotes)
+    
+
+
+@app.route("/get_quote_by_id/<quote_id>", methods = ["GET"])
+def get_quote_by_id(quote_id):
+    quote_header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+    quote_body = db.execute ("SELECT * FROM quote_body WHERE quote_num = ?", quote_id)
+    full_quote = jsonify({"quote_header": quote_header}, {"quote_body": quote_body})
+    return full_quote
+
+
+
+@app.route("/get_quotes_by_customerId/<customer_id>", methods = ["GET"])
+def get_quotes_by_customer(customer_id):
+    # Get all the quote_headers for this customer
+    quote_headers = db.execute("SELECT * FROM quote_header WHERE customer_id = ?", customer_id)
+    # Get me an empty list to store all the quotes as dictionaries
+    quotes = []
+    # For each quote_num in header, get me all the body rows with that same quote_num
+    for i in range(len(quote_headers)):
+        quote_body = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_headers[i]["quote_num"])
+        quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
+    return jsonify(quotes)
+
+
+# Pending full implementation
+# I have to modify the quote_header table to include a company_name column
+@app.route("/get_quotes_by_customer_name", methods = ["GET"])
+def get_quotes_by_customer_name():
+        # Check first if customer provides an input
+    user_input = []
+    if request.is_json:
+        user_input = request.get_json()
+        matching_customers_id = db.execute("SELECT id FROM customers WHERE company_name LIKE ?", ('%'+user_input["company_name"]+'%'))
+        if not matching_customers_id:
+            return jsonify({"message": "customer not found"}), 400
+        print(matching_customers_id)
+        return jsonify({"message": "ok"})
+    else:
+        return jsonify({"message": "must provide body"})
+
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+        app.run(debug=True)
 
 
