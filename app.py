@@ -259,7 +259,6 @@ def convert_quote_to_sorder():
     if not quote_header:
         return jsonify({"message": "invalid quote_num customer_id combination"}), 400
     
-    
     # Get ALL the item lines from quote_body with status "PENDING"
     quote_body = db.execute(
         "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?", 
@@ -269,7 +268,6 @@ def convert_quote_to_sorder():
     # Making sure the quote has any pending items to be converted
     if not quote_body:
         return jsonify({"message": "this quote is no longer available"}), 400
-
 
     # Create the sorder_header to generate the order_num
     db.execute(
@@ -293,7 +291,6 @@ def convert_quote_to_sorder():
             sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
             sorder_input["delivery_date"], quote_body[i]["quote_num"]
         )
-
 
     # Update sorder_header with the total_net_value
     db.execute(
@@ -375,7 +372,53 @@ def partial_quote_to_sorder():
     # Return success message
     return jsonify({"message": "sales order succesfully created", "order_num": sorder_header[0]["order_num"]})
     
-    
+
+# Get all sales orders
+@app.route("/get_all_sorders", methods = ["GET"])
+def get_all_sorders():
+    sorder_headers = db.execute("SELECT * FROM sorder_header")
+    # Get me an empty list to store all the sorderss as dictionaries
+    sorders = []
+    # For each order_num in header, get all the sorder_body rows with that same order_num
+    for i in range(len(sorder_headers)):
+        sorder_body = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_headers[i]["order_num"])
+        sorders.append({"1_sorder_header": sorder_headers[i], "2_sorder_body": sorder_body})
+    return jsonify(sorders)
+
+
+@app.route("/get_sorder_by_id/<sorder_id>", methods = ["GET"])
+def get_sorder_by_id(sorder_id):
+    sorder_header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", sorder_id)
+    sorder_body = db.execute ("SELECT * FROM sorder_body WHERE order_num = ?", sorder_id)
+    full_sorder = jsonify({"sorder_header": sorder_header}, {"sorder_body": sorder_body})
+    return full_sorder
+
+
+@app.route("/get_sorders_by_customer_id/<customer_id>", methods = ["GET"])
+def get_sorders_by_customer_id(customer_id):
+    # Get all the sorder_headers for this customer
+    sorder_headers = db.execute("SELECT * FROM sorder_header WHERE customer_id = ?", customer_id)
+    # Get me an empty list to store all the sorders as dictionaries
+    sorders = []
+    # For each sorder_num in header, get me all the body rows with that same sorder_num
+    for i in range(len(sorder_headers)):
+        sorder_body = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_headers[i]["order_num"])
+        sorders.append({"1_sorder_header": sorder_headers[i], "2_sorder_body": sorder_body})
+    return jsonify(sorders)
+
+
+# Pending implementation
+@app.route("/get_sorders_by_status", methods = ["GET"])
+def get_sorders_by_status():
+    pass
+
+
+# Pending implementation
+@app.route("/get_sorders_by_customer_and_status", methods = ["GET"])
+def get_sorders_by_customer_and_status():
+    pass
+
+
 
 
 
