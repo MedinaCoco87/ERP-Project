@@ -240,3 +240,19 @@ CREATE TABLE item_categories (
     CHECK (id >= 100 AND id <= 999));
 
 *SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, counter INTEGER DEFAULT 1, created_by TEXT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
+
+*SQL* DROP TABLE stock;
+CREATE TABLE stock (
+category_id INTEGER NOT NULL, 
+item_id INTEGER NOT NULL UNIQUE,
+item_description TEXT NOT NULL, 
+stock_total INTEGER, 
+stock_approved INTEGER,
+stock_in_qc INTEGER, 
+stock_rejected INTEGER, 
+stock_onsale INTEGER, 
+stock_incoming INTEGER,
+stock_available INTEGER, 
+FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, 
+FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
+);
