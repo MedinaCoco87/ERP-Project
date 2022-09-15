@@ -330,7 +330,6 @@ def partial_quote_to_sorder():
         )
         if not quote_body_row:
             return jsonify({"message": "invalid item", "reference": items[i]["item_id"]}), 400
-
         quote_body.append(quote_body_row[0])
 
     # Create the sorder_header to generate the order_num
@@ -344,34 +343,48 @@ def partial_quote_to_sorder():
         "SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
     )
 
-    # Insert only requested items as rows in sorder_body.
     # Keep track of total_net_value to update it in sorder_header
     total_net_value = 0
+    # Iterate over all the available rows in the quote 
     for i in range(len(quote_body)):
+        # Calculate net price and update total_net_value through all the iteration
         net_price = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"])
         total_net_value = total_net_value + (net_price * quote_body[i]["quantity"])
+        # Insert all requested items as rows in sorder_body.
         db.execute(
             "INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
             sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
             user_input["delivery_date"], quote_body[i]["quote_num"]
         )
-    
+        # Change status of every item in quote_body to sold
+        db.execute(
+            "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND line_ref = ?",
+            "SOLD", quote_body[i]["quote_num"], quote_body[i]["item_id"], quote_body[i]["line_ref"]
+        )
+        # Get the current status of stock for the item
+        stock_row = db.execute( 
+            "SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
+        )
+        # Calculate the new stock values for the columns affected
+        new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
+        new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
+        # Update item values in stock table (+ stock_onsale, - stock_available)
+        db.execute(
+            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
+            new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
+        )
+
     # Update sorder_header with the total_net_value
     db.execute(
         "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
         total_net_value, sorder_header[0]["order_num"]
     )
     
-    # Change status of every item in quote_body to sold
-    for i in range(len(quote_body)):
-        db.execute(
-            "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND line_ref = ?",
-            "SOLD", quote_body[i]["quote_num"], quote_body[i]["item_id"], quote_body[i]["line_ref"]
-        )
     
     # Return success message
     return jsonify({"message": "sales order succesfully created", "order_num": sorder_header[0]["order_num"]})
     
+
 
 # Get all sales orders
 @app.route("/get_all_sorders", methods = ["GET"])
@@ -450,6 +463,38 @@ def positive_stock_adjustment():
 
     return jsonify({"message": "success"}), 200
 
+
+
+@app.route("/negative_stock_adjustment", methods = ["POST"])
+def negative_stock_adjustment():
+    user_input = request.get_json()
+    # Get current row of stock table for requested item
+    item_stock = db.execute(
+        "SELECT * FROM stock WHERE item_id = ?", 
+        user_input["item_id"]
+    )
+    if not item_stock:
+        return jsonify({"message": "invalid item"}), 400
+    if not isinstance(user_input["quantity"], int) or user_input["quantity"] < 0:
+        return jsonify({"message": "invalid quantity"}), 400
+    # Get all stock columns involved in this adjustment and calculate new value
+    updated_stock_total = item_stock[0]["stock_total"] - user_input["quantity"]
+    updated_stock_appr = item_stock[0]["stock_approved"] - user_input["quantity"]
+    updated_stock_available = item_stock[0]["stock_available"] - user_input["quantity"]
+
+    # Update values in stock table
+    db.execute(
+        "UPDATE stock SET stock_total = ?, stock_approved = ?, stock_available = ? WHERE item_id = ?",
+        updated_stock_total, updated_stock_appr, updated_stock_available, user_input["item_id"]
+    )
+
+    # Add movement to the table stock_moves
+    db.execute(
+        "INSERT INTO stock_moves (item_id, item_description, quantity, stock_bef, stock_aft, reference, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        item_stock[0]["item_id"], item_stock[0]["item_description"], user_input["quantity"], item_stock[0]["stock_total"], updated_stock_total, "negative_adjustment", user_input["user_id"] 
+    )
+
+    return jsonify({"message": "success"}), 200
 
 
 
