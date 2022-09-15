@@ -419,7 +419,36 @@ def get_sorders_by_customer_and_status():
     pass
 
 
+@app.route("/positive_stock_adjustment", methods = ["POST"])
+def positive_stock_adjustment():
+    user_input = request.get_json()
+    # Get current row of stock table for requested item
+    item_stock = db.execute(
+        "SELECT * FROM stock WHERE item_id = ?", 
+        user_input["item_id"]
+    )
+    if not item_stock:
+        return jsonify({"message": "invalid item"}), 400
+    if not isinstance(user_input["quantity"], int) or user_input["quantity"] < 0:
+        return jsonify({"message": "invalid quantity"}), 400
+     # Get all stock columns involved in this adjustment and calculate new value
+    updated_stock_total = item_stock[0]["stock_total"] + user_input["quantity"]
+    updated_stock_appr = item_stock[0]["stock_approved"] + user_input["quantity"]
+    updated_stock_available = item_stock[0]["stock_available"] + user_input["quantity"]
 
+    # Update values in stock table
+    db.execute(
+        "UPDATE stock SET stock_total = ?, stock_approved = ?, stock_available = ? WHERE item_id = ?",
+        updated_stock_total, updated_stock_appr, updated_stock_available, user_input["item_id"]
+    )
+
+    # Add movement to the table stock_moves
+    db.execute(
+        "INSERT INTO stock_moves (item_id, item_description, quantity, stock_bef, stock_aft, reference, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        item_stock[0]["item_id"], item_stock[0]["item_description"], user_input["quantity"], item_stock[0]["stock_total"], updated_stock_total, "positive_adjustment", user_input["user_id"] 
+    )
+
+    return jsonify({"message": "success"}), 200
 
 
 

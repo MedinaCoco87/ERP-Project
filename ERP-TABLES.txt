@@ -242,17 +242,29 @@ CREATE TABLE item_categories (
 *SQL* CREATE TABLE item_categories (id INTEGER PRIMARY KEY NOT NULL UNIQUE, description TEXT NOT NULL UNIQUE, counter INTEGER DEFAULT 1, created_by TEXT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE SET NULL, CHECK (id >= 100 AND id <= 999));
 
 *SQL* DROP TABLE stock;
-CREATE TABLE stock (
-category_id INTEGER NOT NULL, 
-item_id INTEGER NOT NULL UNIQUE,
-item_description TEXT NOT NULL, 
-stock_total INTEGER, 
-stock_approved INTEGER,
-stock_in_qc INTEGER, 
-stock_rejected INTEGER, 
-stock_onsale INTEGER, 
-stock_incoming INTEGER,
-stock_available INTEGER, 
-FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, 
-FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
-);
+*SQL* CREATE TABLE stock (category_id INTEGER NOT NULL, item_id INTEGER NOT NULL UNIQUE, item_description TEXT NOT NULL, stock_total INTEGER, stock_approved INTEGER, stock_in_qc INTEGER, stock_rejected INTEGER, stock_onsale INTEGER, stock_incoming INTEGER, stock_available INTEGER, FOREIGN KEY (category_id) REFERENCES item_categories (id) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
+
+CREATE TRIGGER stock_creation AFTER INSERT ON items
+BEGIN
+INSERT INTO stock(category_id, item_id, item_description, stock_total, stock_approved, stock_in_qc, stock_rejected, stock_onsale, stock_incoming, stock_available)
+VALUES(new.category_id, new.id, new.description, 0, 0, 0, 0, 0, 0, 0);
+END;
+
+*SQL* DROP TABLE stock_moves;
+CREATE TABLE stock_moves (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    date DATE DEFAULT CURRENT_DATE,  
+    item_id INTEGER NOT NULL,
+    item_description TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    stock_bef INTEGER NOT NULL,
+    stock_aft INTEGER NOT NULL, 
+    reference TEXT NOT NULL, 
+    customer_id INTEGER, 
+    invoice_num INTEGER,  
+    user_id INTEGER NOT NULL, 
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE CASCADE, 
+    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE, 
+    FOREIGN KEY (invoice_id) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE
+    );
+*SQL* CREATE TABLE stock_moves (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE DEFAULT CURRENT_DATE, item_id INTEGER NOT NULL, item_description TEXT NOT NULL, quantity INTEGER NOT NULL, stock_bef INTEGER NOT NULL, stock_aft INTEGER NOT NULL, reference TEXT NOT NULL, customer_id INTEGER, invoice_id INTEGER, user_id INTEGER NOT NULL, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE CASCADE, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE, FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE);
