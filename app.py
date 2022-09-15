@@ -16,6 +16,9 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure database
 db = SQL("sqlite:///erpdatabase.db")
 
+# Set global variable with tax rate
+tax_rate = 0.18
+
 # Initial routes to test from postman
 
 @app.route ("/users", methods = ["POST"])
@@ -245,8 +248,6 @@ def get_quotes_by_customer_name():
 
 
 
-
-
 @app.route("/convert_quote_to_sorder", methods = ["POST"])
 def convert_quote_to_sorder():
     sorder_input = request.get_json()
@@ -265,7 +266,7 @@ def convert_quote_to_sorder():
         sorder_input["quote_num"], "PENDING"
     )
 
-    # Making sure the quote has any pending items to be converted
+    # Making sure the quote has some pending items to be converted
     if not quote_body:
         return jsonify({"message": "this quote is no longer available"}), 400
 
@@ -290,6 +291,18 @@ def convert_quote_to_sorder():
             "INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
             sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
             sorder_input["delivery_date"], quote_body[i]["quote_num"]
+        )
+        # Get the current row of stock for the item
+        stock_row = db.execute( 
+            "SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
+        )
+        # Calculate the new stock values for the columns affected
+        new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
+        new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
+        # Update item values in stock table (+stock_onsale, -stock_available)
+        db.execute(
+            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
+            new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
         )
 
     # Update sorder_header with the total_net_value
@@ -379,8 +392,7 @@ def partial_quote_to_sorder():
         "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
         total_net_value, sorder_header[0]["order_num"]
     )
-    
-    
+     
     # Return success message
     return jsonify({"message": "sales order succesfully created", "order_num": sorder_header[0]["order_num"]})
     
@@ -403,8 +415,7 @@ def get_all_sorders():
 def get_sorder_by_id(sorder_id):
     sorder_header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", sorder_id)
     sorder_body = db.execute ("SELECT * FROM sorder_body WHERE order_num = ?", sorder_id)
-    full_sorder = jsonify({"sorder_header": sorder_header}, {"sorder_body": sorder_body})
-    return full_sorder
+    return jsonify({"sorder_header": sorder_header}, {"sorder_body": sorder_body})
 
 
 @app.route("/get_sorders_by_customer_id/<customer_id>", methods = ["GET"])
@@ -495,6 +506,36 @@ def negative_stock_adjustment():
     )
 
     return jsonify({"message": "success"}), 200
+
+
+@app.route("convert_sorder_to_invoice", methods = ["POST"])
+def convert_sorder_to_invoice():
+    user_input = request.get_json()
+    # Check sorder_num and customer_id provided are a valid combination
+    sorder_header = db.execute(
+        "SELECT * FROM sorder_header WHERE order_num = ? AND customer_id = ? AND status != ?",
+        user_input["sorder_num"], user_input["customer_id"], "DELIVERED"
+    )
+    if not sorder_header:
+        return jsonify({"message": "invalid customer_id/sorder_num combination"})
+    # Get all the pending lines from sorder_body
+    sorder_body = db.execute(
+        "SELECT * FROM sorder_body WHERE order_num = ? AND status = ?",
+        user_input["sorder_num"], "PENDING"
+    )
+    # Check there is enough stock of all the items the user wants to invoice
+    # If the loop makes it to the end without breaking, I can then start issuing the invoice
+    for i in range(len(sorder_body)):
+        item_stock = db.execute(
+            "SELECT * FROM stock WHERE item_id = ?", sorder_body[i]["item_id"]
+        )
+        if item_stock[i]["stock_approved"] < sorder_body[i]["quantity"]:
+            return jsonify({"message": "stock insufficient", "item": sorder_body[i]["item_id"]})
+
+    # Create the invoice_header to generate the invoice number
+    # TODO
+    
+        
 
 
 
