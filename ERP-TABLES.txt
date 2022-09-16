@@ -282,13 +282,13 @@ CREATE TABLE invoice_body (
     net_price FLOAT NOT NULL,
     tax_amount FLOAT NOT NULL,
     FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE,
-    FOREIGN KEY (sorder_num) REFERENCES sorder_body (order_num) ON DELETE RESTRICT,
+    FOREIGN KEY (sorder_num) REFERENCES sorder_header (order_num) ON DELETE RESTRICT,
     FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT,
-    FOREIGN KEY (delivery_id) REFERENCES delivery_body (id) ON DELETE RESTRICT,
+    FOREIGN KEY (delivery_id) REFERENCES delivery_header (id) ON DELETE RESTRICT,
     CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0)
 )
 
-*SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, delivery_id INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_body (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, FOREIGN KEY (delivery_id) REFERENCES delivery_body (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));
+*SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, delivery_id INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_header (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, FOREIGN KEY (delivery_id) REFERENCES delivery_header (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));
 
 CREATE TABLE delivery_header (
     date DATE DEFAULT CURRENT_DATE,
@@ -320,3 +320,6 @@ CREATE TABLE delivery_body (
 CREATE TABLE delivery_header (date DATE DEFAULT CURRENT_DATE, id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER, total_net_value FLOAT, delivery_address BLOB, created_by TEXT, status TEXT DEFAULT CREATED, invoice_num INTEGER, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE RESTRICT, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE RESTRICT);
 
 CREATE TABLE delivery_body (id INTEGER NOT NULL, item_id INTEGER NOT NULL, line_ref INTEGER, quantity INTEGER NOT NULL, sorder_num INTEGER NOT NULL, net_price FLOAT NOT NULL, FOREIGN KEY (id) REFERENCES delivery_header (id) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, FOREIGN KEY (sorder_num) REFERENCES sorder_header (order_num) ON DELETE RESTRICT);
+
+*SQL* CREATE TABLE invoice_header (invoice_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT NOT NULL, total_tax_amount FLOAT, payment_terms TEXT DEFAULT COD, due_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT UNPAID, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE RESTRICT);
+*SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, delivery_id INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_header (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, FOREIGN KEY (delivery_id) REFERENCES delivery_header (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));

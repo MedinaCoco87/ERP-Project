@@ -595,7 +595,7 @@ def validate_delivery():
         "SELECT * FROM delivery_body WHERE id = ?", user_input["delivery_id"]
     )
     # Update stock status for all items of the current delivery_body
-    stock_move_reference = "DELIVERY ID" + str(user_input["delivery_id"])
+    stock_move_reference = "DELIVERY ID " + str(user_input["delivery_id"])
     for i in range(len(delivery_body)):
         current_item_stock = db.execute(
             "SELECT * FROM stock WHERE item_id = ?", 
@@ -620,12 +620,48 @@ def validate_delivery():
 
 
 
-@app.route("/create_invoice", methods = ["POST"])
-def create_invoice():
-    pass
+@app.route("/create_invoice_from_delivery", methods = ["POST"])
+def create_invoice_from_delivery():
+    user_input = request.get_json()
+    # Check there is a validated delivery that matches user_input
+    delivery_header = db.execute(
+        "SELECT * FROM delivery_header WHERE id = ? AND customer_id = ? AND status = ?",
+        user_input["delivery_id"], user_input["customer_id"], "VALIDATED"
+    )
+    if not delivery_header:
+        return jsonify({"message": "invalid delivery_id/customer or delivery not available"}), 400
+    # Get all the item lines from that delivery
+    delivery_body = db.execute(
+        "SELECT * FROM delivery_body WHERE id = ?", user_input["delivery_id"]
+    )
+    # Create invoice_header // for now only handles cash payment
+    total_tax_amount = delivery_header[0]["total_net_value"] * tax_rate
+    db.execute(
+        "INSERT INTO invoice_header (customer_id, total_net_value, total_tax_amount, status, created_by) VALUES (?, ?, ?, ?, ?)",
+        delivery_header[0]["customer_id"], delivery_header[0]["total_net_value"], total_tax_amount, "CREATED", user_input["created_by"]
+    )
+    # Get the invoice_header to use the invoice_id in the body lines
+    invoice_header = db.execute("SELECT * FROM invoice_header ORDER BY invoice_num DESC LIMIT 1")
+
+    # Create the invoice_body for all the items
+    for i in range(len(delivery_body)):
+        tax_amount = delivery_body[i]["net_price"] * tax_rate
+        db.execute(
+            "INSERT INTO invoice_body (invoice_num, line_ref, sorder_num, delivery_id, item_id, quantity, net_price, tax_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            invoice_header[0]["invoice_num"], delivery_body[i]["line_ref"], delivery_body[i]["sorder_num"],
+            user_input["delivery_id"], delivery_body[i]["item_id"], delivery_body[i]["quantity"], 
+            delivery_body[i]["net_price"], tax_amount
+        )
+    # Update delivery_header change status and include invoice_num
+    db.execute(
+        "UPDATE delivery_header SET status = ?, invoice_num = ? WHERE ID = ?",
+        "INVOICED", invoice_header[0]["invoice_num"], delivery_header[0]["id"]
+    )
+    # Confirm operation success
+    return jsonify({"message": "invoice created ok", "invoice_num": invoice_header[0]["invoice_num"]})
+    
 
         
-
 
 
 if __name__ == "__main__":
