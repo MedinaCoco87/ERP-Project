@@ -508,8 +508,8 @@ def negative_stock_adjustment():
     return jsonify({"message": "success"}), 200
 
 
-@app.route("convert_sorder_to_invoice", methods = ["POST"])
-def convert_sorder_to_invoice():
+@app.route("/create_delivery", methods = ["POST"])
+def create_delivery():
     user_input = request.get_json()
     # Check sorder_num and customer_id provided are a valid combination
     sorder_header = db.execute(
@@ -523,18 +523,107 @@ def convert_sorder_to_invoice():
         "SELECT * FROM sorder_body WHERE order_num = ? AND status = ?",
         user_input["sorder_num"], "PENDING"
     )
-    # Check there is enough stock of all the items the user wants to invoice
-    # If the loop makes it to the end without breaking, I can then start issuing the invoice
+    if not sorder_body:
+        return jsonify({"message": "this order has no pending items"}), 400
+    # Check there is enough stock of all the items the user wants to deliver
+    # If the loop makes it to the end without breaking, I can start creating the delivery
     for i in range(len(sorder_body)):
         item_stock = db.execute(
             "SELECT * FROM stock WHERE item_id = ?", sorder_body[i]["item_id"]
         )
-        if item_stock[i]["stock_approved"] < sorder_body[i]["quantity"]:
+        if item_stock[0]["stock_approved"] < sorder_body[i]["quantity"]:
             return jsonify({"message": "stock insufficient", "item": sorder_body[i]["item_id"]})
+    # If customer indicates delivery address as "default" must bring the info from user table.
+    if user_input["delivery_address"].upper() == "DEFAULT":
+        customer_info = db.execute(
+            "SELECT * FROM customers WHERE id = ?", user_input["customer_id"]
+        )
+        delivery_address = customer_info[0]["address_street"] + ", " + customer_info[0]["address_city"] + "."
+    # If user provides a different address, this one will be used.
+    else:
+        delivery_address = user_input["delivery_address"]
+    # Create the delivery_header
+    db.execute(
+        "INSERT INTO delivery_header (customer_id, delivery_address, created_by) VALUES (?, ?, ?)",
+        user_input["customer_id"], delivery_address, user_input["created_by"]
+    )
 
-    # Create the invoice_header to generate the invoice number
-    # TODO
+    # Get the delivery header just created to use the id
+    delivery_header = db.execute("SELECT * FROM delivery_header ORDER BY id DESC LIMIT 1")
     
+    # Keep track of the total net value to update it in the body_header
+    total_net_value = 0
+    # Complete the delivery_body with all rows
+    for i in range(len(sorder_body)):
+        total_net_value = total_net_value + sorder_body[i]["net_price"] * sorder_body[i]["quantity"]
+        db.execute(
+            "INSERT INTO delivery_body (id, item_id, line_ref, quantity, sorder_num, net_price) VALUES (?, ?, ?, ?, ?, ?)",
+            delivery_header[0]["id"], sorder_body[i]["item_id"], sorder_body[i]["line_ref"], sorder_body[i]["quantity"],
+            sorder_body[i]["order_num"], sorder_body[i]["net_price"]
+        )
+        # Update sorder_body status for every line to "ON DELIVERY"
+        db.execute(
+            "UPDATE sorder_body SET status = ? WHERE item_id = ? AND line_ref = ? AND order_num = ?",
+            "ON DELIVERY", sorder_body[i]["item_id"], sorder_body[i]["line_ref"], sorder_body[i]["order_num"] 
+        )
+    # Update delivery_header total_net_value
+    db.execute(
+        "UPDATE delivery_header SET total_net_value = ? WHERE id = ?",
+        total_net_value, delivery_header[0]["id"]
+    )
+
+    return jsonify({"message": "delivery receipt created", "delivery_id": delivery_header[0]["id"]})
+
+
+@app.route("/validate_delivery", methods = ["POST"])
+def validate_delivery():
+    user_input = request.get_json()
+    # Check there is a delivery that matches user_input and is pending validation.
+    delivery_header = db.execute(
+        "SELECT * FROM delivery_header WHERE id = ? AND customer_id = ? AND status = ?",
+        user_input["delivery_id"], user_input["customer_id"], "CREATED" 
+    )
+    if not delivery_header:
+        return jsonify({"message": "invalid customer_id/delivery combination or already validated"})
+    # Change delivery_header status to "validated"
+    db.execute(
+        "UPDATE delivery_header SET status = ? WHERE id = ?",
+        "VALIDATED", user_input["delivery_id"]
+    )
+    # Get all lines from delivery_body current id
+    delivery_body = db.execute(
+        "SELECT * FROM delivery_body WHERE id = ?", user_input["delivery_id"]
+    )
+    # Update stock status for all items of the current delivery_body
+    stock_move_reference = "DELIVERY ID" + str(user_input["delivery_id"])
+    for i in range(len(delivery_body)):
+        current_item_stock = db.execute(
+            "SELECT * FROM stock WHERE item_id = ?", 
+            delivery_body[i]["item_id"]
+        )
+        updated_stock_total = current_item_stock[0]["stock_total"] - delivery_body[i]["quantity"]
+        updated_stock_approved = current_item_stock[0]["stock_approved"] - delivery_body[i]["quantity"]
+        updated_stock_onsale = current_item_stock[0]["stock_onsale"] - delivery_body[i]["quantity"]
+        db.execute(
+            "UPDATE stock SET stock_total = ?, stock_approved = ?, stock_onsale = ? WHERE item_id = ?",
+            updated_stock_total, updated_stock_approved, updated_stock_onsale, delivery_body[i]["item_id"]
+        )
+        # Includes this operation in table stock_moves for each item line
+        db.execute(
+            "INSERT INTO stock_moves (item_id, item_description, quantity, stock_bef, stock_aft, reference, customer_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            delivery_body[i]["item_id"], "NO DESCRIPTION", delivery_body[i]["quantity"], current_item_stock[0]["stock_total"], updated_stock_total,
+            stock_move_reference, user_input["customer_id"], user_input["created_by"]
+        )
+
+    return jsonify({"message": "delivery validation ok"})
+
+
+
+
+@app.route("/create_invoice", methods = ["POST"])
+def create_invoice():
+    pass
+
         
 
 
