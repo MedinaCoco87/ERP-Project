@@ -51,11 +51,13 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
         user = db.execute(
-            "SELECT * FROM users WHERE username = ? and hashed_pass = ?", username, password
+            "SELECT * FROM users WHERE username = ?", username
         )
 
-        # if len(user) != 1:
-            # return error message
+        if len(user) != 1:
+            return render_template("error.html", message="Invalid user")
+        if not check_password_hash(user[0]["hashed_pass"], password):
+            return render_template("error.html", message="Invalid password")
 
         session["user_id"] = user[0]["id"]
         session["profile"] = user[0]["profile"]
@@ -72,6 +74,36 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
+@app.route("/edit_user", methods = ["GET", "POST"])
+def edit_user():
+    if session["profile"] != super_admin:
+        return redirect("change_password.html")
+    else:
+        pass
+
+@app.route("/change_password", methods = ["POST", "GET"])
+def change_password():
+    if request.method == "POST":
+        user_current_info = db.execute(
+            "SELECT * FROM users WHERE id = ?", session["user_id"] 
+        )
+        old_pass = request.form.get("old_password")
+        new_pass = request.form.get("new_password")
+        confirm_pass = request.form.get("confirm_password")
+        if not old_pass or old_pass != user_current_info[0]["hashed_pass"]:
+            return render_template("error.html", message="Invalid password")
+        if not new_pass or not confirm_pass or new_pass != confirm_pass:
+            return render_template("error.html", message="Password and/or confirmation are not valid")
+        db.execute(
+            "UPDATE users SET hashed_pass = ? WHERE id = ?",
+            generate_password_hash(new_pass), session["user_id"]
+        )
+        return render_template("success.html", message="Password succesfully changed")
+    
+    return render_template("change_password.html")
+    
+
+    
 
 
 
@@ -87,14 +119,14 @@ def create_user():
             plain_password = request.form.get("password")
             profile = request.form.get("profile")
             if profile not in regular_profiles:
-                pass # return "invalid user profile"
+                return render_template("error.html", message="invalid user profile")
             user_rows = db.execute(
                 "SELECT * FROM users WHERE username = ?", username
             )
             if len(user_rows) == 1:
-                pass # return "User already taken"
+                return render_template("error.html", message="User already taken")
             if not plain_password:
-                pass # return "must provide a valid password"
+                return render_template("error.html", message="Must provide a valid password")
             db.execute(
                 "INSERT INTO users (username, hashed_pass, profile, status) VALUES (?, ?, ?, ?)",
                 username, generate_password_hash(plain_password), profile, "active"
@@ -107,30 +139,25 @@ def create_user():
             plain_password = request.form.get("password")
             profile = request.form.get("profile")
             if session["profile"] not in [regular_profiles, super_admin]:
-                pass # return "invalid user profile"
+                return render_template("error.html", message="Invalid user profile")
             user_rows = db.execute(
                 "SELECT * FROM users WHERE username = ?", username
             )
             if len(user_rows) == 1:
-                pass # return "User already taken"
+                return render_template("error.html", message="User already taken")
             if not plain_password:
-                pass # return "must provide a valid password"
+                return render_template("error.html", message="Must provide a valid password")
             db.execute(
                 "INSERT INTO users (username, hashed_pass, profile) VALUES (?, ?, ?)",
                 username, generate_password_hash(plain_password), profile
             )
             return redirect("/users")
         else:
-            pass
-            # return "You don't have permission to perform this action"
+            return render_template("error.html", message="You don't have permission to perform this action")
     
     return render_template("new_user.html")
         
-        
-        
-        
-    db.execute ("INSERT INTO users (username, hashed_pass, profile, status) VALUES (?, ?, ?, ?)", user["username"], user["password"], user["profile"], user["status"])
-    return jsonify({"message": "user created"})
+    
 
 
 
