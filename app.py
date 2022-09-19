@@ -16,8 +16,63 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure database
 db = SQL("sqlite:///erpdatabase.db")
 
+# Configure Session
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 # Set global variable with tax rate
 tax_rate = 0.18
+
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
+# First route of frontend version
+
+@app.route("/", methods = ["GET"])
+def index():
+    return render_template("index.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # Forget any user info
+    session.clear()
+    if request.method == "GET":
+        return render_template ("login.html")
+    else:
+        username = request.form.get("username")
+        password = request.form.get("password")
+        user = db.execute(
+            "SELECT * FROM users WHERE username = ? and hashed_pass = ?", username, password
+        )
+
+        # if len(user) != 1:
+            # return error message
+
+        session["user_id"] = user[0]["id"]
+        session["profile"] = user[0]["profile"]
+        return redirect("/")
+
+
+@app.route("/logout", methods = ["GET"])
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/login")
+
+
+
+
 
 # Initial routes to test from postman
 

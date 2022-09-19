@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block body %}
+    <p>Homepage</p>
+    <form method="get" action="/logout">
+        <button type="submit">Log Out</button>
+    </form>    
+{% endblock %}
