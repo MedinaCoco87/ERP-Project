@@ -21,8 +21,10 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set global variable with tax rate
+# Set global variables
 tax_rate = 0.18
+regular_profiles = ["standard", "admin"]
+super_admin = "super_admin"
 
 @app.after_request
 def after_request(response):
@@ -76,9 +78,57 @@ def logout():
 
 # Initial routes to test from postman
 
-@app.route ("/users", methods = ["POST"])
+@app.route ("/create_user", methods = ["GET", "POST"])
 def create_user():
-    user = request.get_json()
+    if request.method == "POST":
+        if session["profile"] == "admin":
+            # Get the user input from the form:
+            username = request.form.get("username").lower()
+            plain_password = request.form.get("password")
+            profile = request.form.get("profile")
+            if profile not in regular_profiles:
+                pass # return "invalid user profile"
+            user_rows = db.execute(
+                "SELECT * FROM users WHERE username = ?", username
+            )
+            if len(user_rows) == 1:
+                pass # return "User already taken"
+            if not plain_password:
+                pass # return "must provide a valid password"
+            db.execute(
+                "INSERT INTO users (username, hashed_pass, profile, status) VALUES (?, ?, ?, ?)",
+                username, generate_password_hash(plain_password), profile, "active"
+            )
+            return redirect("/users")
+        
+        elif session["profile"] == super_admin:
+            # Get the user input from the form:
+            username = request.form.get("username").lower()
+            plain_password = request.form.get("password")
+            profile = request.form.get("profile")
+            if session["profile"] not in [regular_profiles, super_admin]:
+                pass # return "invalid user profile"
+            user_rows = db.execute(
+                "SELECT * FROM users WHERE username = ?", username
+            )
+            if len(user_rows) == 1:
+                pass # return "User already taken"
+            if not plain_password:
+                pass # return "must provide a valid password"
+            db.execute(
+                "INSERT INTO users (username, hashed_pass, profile) VALUES (?, ?, ?)",
+                username, generate_password_hash(plain_password), profile
+            )
+            return redirect("/users")
+        else:
+            pass
+            # return "You don't have permission to perform this action"
+    
+    return render_template("new_user.html")
+        
+        
+        
+        
     db.execute ("INSERT INTO users (username, hashed_pass, profile, status) VALUES (?, ?, ?, ?)", user["username"], user["password"], user["profile"], user["status"])
     return jsonify({"message": "user created"})
 
