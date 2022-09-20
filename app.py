@@ -207,19 +207,10 @@ def get_customer_by_id(customer_id):
     
 
 @app.route("/customers/", methods = ["GET"])
-def get_customers_by_name():
-    get_the_name = []
-    if request.is_json:
-        get_the_name = request.get_json()
-        customers = db.execute("SELECT * FROM customers WHERE company_name LIKE ?", ('%'+get_the_name["company_name"]+'%'))
-        if not customers:
-            return jsonify({"message": "customer not found"}), 400
-        return jsonify(customers), 200
-    # In case user doesn't type any name will return all customers
-    else:
-        all_customers = db.execute("SELECT * FROM customers")
-        if not get_the_name:
-            return jsonify(all_customers), 200
+@login_required
+def get_customers():
+    customers = db.execute("SELECT * FROM customers")
+    return render_template("customers.html", customers=customers)
 
 
 

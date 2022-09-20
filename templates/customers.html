@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Customers
+{% endblock %}
+
+{% block body %}
+    <p>Customers</p>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Tax ID</th>
+                <th>Street</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Payment terms</th>
+                <th>Credit Line</th>
+                <th>Available Credit</th>
+                <th>Created by</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer["id"] }}</td>
+                <td>{{ customer["company_name"] }}</td>
+                <td>{{ customer["tax_id"] }}</td>
+                <td>{{ customer["address_street"] }}</td>
+                <td>{{ customer["address_city"] }}</td>
+                <td>{{ customer["address_country"] }}</td>
+                <td>{{ customer["payment_condition"] }}</td>
+                <td>{{ customer["credit_line"] }}</td>
+                <td>{{ customer["available_credit"] }}</td>
+                <td>{{ customer["created_by"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">Home</a>
+{% endblock %}
