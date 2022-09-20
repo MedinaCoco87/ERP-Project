@@ -216,11 +216,27 @@ def get_customers():
 
 
 # Database is validating category_id is an integer between 100 and 999.
-@app.route ("/item_categories", methods = ["POST"])
+
+@app.route ("/get_item_categories", methods = ["GET"])
+def get_item_categories():
+    categories = db.execute("SELECT * FROM item_categories")
+    return render_template("item_categories.html", categories=categories)
+
+
+@app.route ("/create_category", methods = ["GET", "POST"])
 def create_category():
-    category = request.get_json()
-    db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", category["id"], category["description"].upper(), category["created_by"])
-    return jsonify({"message": "item_category created"})
+    if request.method == "POST":
+        category = db.execute(
+            "SELECT * FROM item_categories WHERE id = ?",
+            request.form.get("category_id")
+        )
+        if len(category) >= 1:
+            return render_template("error.html", message="Category ID already taken")
+        db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", 
+        request.form.get("category_id"), request.form.get("description").upper(), session["username"])
+        categories = db.execute("SELECT * FROM item_categories")
+        return render_template("item_categories.html", categories=categories, message="Category created!")
+    return render_template("create_categories.html")
 
 
 @app.route ("/category_by_id/<item_category>", methods = ["GET"])
@@ -228,14 +244,6 @@ def get_category(item_category):
     category = db.execute("SELECT * FROM item_categories WHERE id = ?", item_category)
     return jsonify(category), 200
 
-
-
-@app.route ("/get_all_categories", methods = ["GET"])
-def get_all_categories():
-    categories = db.execute("SELECT * FROM item_categories")
-    if not categories:
-        return jsonify({"message": "there are no records in categories yet"}), 400
-    return jsonify(categories), 200
 
 
 

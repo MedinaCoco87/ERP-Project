@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New Category
+{% endblock %}
+
+{% block body %}
+<form action="/create_category" method="post">
+    <div>
+        <input autocomplete="off" autofocus id="id" name="category_id" placeholder="ID" type="number" min="101" max="999">
+    </div>
+    <div>
+        <input id="description" name="description" placeholder="Description" type="text">
+    </div>
+    <button type="submit">Create</button>
+</form>
+{% endblock %}

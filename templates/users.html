@@ -24,5 +24,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="/">Home</a>
+    <form method="get" action="/create_user">
+        <button type="submit">Create User</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
 {% endblock %}
