@@ -39,5 +39,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="/">Home</a>
+    <form method="get" action="/create_customer">
+        <button type="submit">New Customer</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
 {% endblock %}

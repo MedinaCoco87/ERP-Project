@@ -216,47 +216,69 @@ def get_customers():
 
 
 # Database is validating category_id is an integer between 100 and 999.
-@app.route ("/item_categories", methods = ["POST"])
+
+@app.route ("/get_item_categories", methods = ["GET"])
+def get_item_categories():
+    categories = db.execute("SELECT * FROM item_categories")
+    return render_template("item_categories.html", categories=categories)
+
+
+@app.route ("/create_category", methods = ["GET", "POST"])
 def create_category():
-    category = request.get_json()
-    db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", category["id"], category["description"].upper(), category["created_by"])
-    return jsonify({"message": "item_category created"})
+    if request.method == "POST":
+        category = db.execute(
+            "SELECT * FROM item_categories WHERE id = ?",
+            request.form.get("category_id")
+        )
+        if len(category) >= 1:
+            return render_template("error.html", message="Category ID already taken")
+        db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", 
+        request.form.get("category_id"), request.form.get("description").upper(), session["username"])
+        categories = db.execute("SELECT * FROM item_categories")
+        return render_template("item_categories.html", categories=categories, message="Category created!")
+    return render_template("create_categories.html")
 
-
+# Pending vinculation with frontend
 @app.route ("/category_by_id/<item_category>", methods = ["GET"])
 def get_category(item_category):
     category = db.execute("SELECT * FROM item_categories WHERE id = ?", item_category)
     return jsonify(category), 200
 
+@app.route ("/get_items", methods = ["GET"])
+def get_items():
+    items = db.execute("SELECT * FROM items")
+    return render_template("items.html", items=items)
 
-
-@app.route ("/get_all_categories", methods = ["GET"])
-def get_all_categories():
-    categories = db.execute("SELECT * FROM item_categories")
-    if not categories:
-        return jsonify({"message": "there are no records in categories yet"}), 400
-    return jsonify(categories), 200
-
-
-
-@app.route ("/items", methods = ["POST"])
+@app.route ("/create_item", methods = ["GET", "POST"])
 def create_item():
-    # Get json from postman
-    item = request.get_json()
-    # Identify the category for the new item and get the category full row from its table.
-    item_category_row = db.execute("SELECT * FROM item_categories WHERE id = ?", item["category_id"])
-    if not item_category_row:
-        return jsonify({"message": "invalid category"}), 400
-    # Get the counter from the category
-    category_counter = item_category_row[0]["counter"]
-    # Generate the item_id by concatenating category_id + category_id_counter
-    item_id = int(str(item["category_id"]) + str(category_counter).zfill(4))
-    # Insert new item into items table.
-    db.execute("INSERT INTO items (id, description, full_description, category_id, status, created_by) VALUES (?, ?, ?, ?, ?, ?)", item_id, item["description"], item["full_description"], item["category_id"], item["status"], item["created_by"])
-    # Update counter on item_categories
-    category_counter = category_counter + 1
-    db.execute("UPDATE item_categories SET counter = ? WHERE id = ?", category_counter, item["category_id"])
-    return jsonify({"message": "item created", "item": item_id}), 200
+    if request.method == "POST":
+        # Identify the category for the new item and get the category full row from its table.
+        item_category_row = db.execute(
+            "SELECT * FROM item_categories WHERE id = ?", 
+            request.form.get("category_id")
+        )
+        if not item_category_row:
+            return render_template("error.html", message="invalid category")
+        # Get the counter from the category
+        category_counter = item_category_row[0]["counter"]
+        # Generate the item_id by concatenating category_id + category_id_counter
+        item_id = int(str(request.form.get("category_id")) + str(str(category_counter).zfill(4)))
+        # Insert new item into items table.
+        db.execute(
+            "INSERT INTO items (id, description, full_description, category_id, status, created_by) VALUES (?, ?, ?, ?, ?, ?)", 
+            item_id, request.form.get("description"), request.form.get("full_description"), request.form.get("category_id"), "ACTIVE", session["username"]
+        )
+        # Update counter on item_categories
+        category_counter = category_counter + 1
+        db.execute(
+            "UPDATE item_categories SET counter = ? WHERE id = ?", 
+            category_counter, request.form.get("category_id")
+        )
+        items = db.execute("SELECT * FROM items")
+        message = "Item created " + str(item_id) + "."
+        return render_template("items.html", items=items, message=message)
+
+    return render_template("create_item.html")
 
 
 
