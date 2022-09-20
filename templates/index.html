@@ -5,10 +5,18 @@
 {% endblock %}
 
 {% block body %}
-    <p>Homepage</p>
+    <h3>CDM Homepage</h3>
+    <p>Manage your Deals</p>
     <form method="get" action="/logout">
         <button type="submit">Log Out</button>
     </form>
-    <a href="/change_password">Change password</a>
-    <a href="/create_user">New User</a>
+    <form method="get" action="/change_password">
+        <button type="submit">Change Password</button>
+    </form>
+    <form method="get" action="/create_user">
+        <button type="submit">Create User</button>
+    </form>
+    <form method="get" action="/users">
+        <button type="submit">All Users</button>
+    </form>
 {% endblock %}

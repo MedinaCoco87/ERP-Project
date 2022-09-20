@@ -78,12 +78,8 @@ def logout():
 
 @app.route("/edit_user", methods = ["GET", "POST"])
 @login_required
-def edit_user():
-    if session["profile"] != super_admin:
-        return redirect("change_password.html")
-    if request.method == "GET":
-            return render_template("edit_user.html")
-    
+def edit_user(): # Allow super_admin to change other users passwords and profiles
+    pass
         
 
 @app.route("/change_password", methods = ["POST", "GET"])
@@ -167,11 +163,10 @@ def create_user():
 
 
 @app.route ("/users", methods = ["GET"])
+@login_required
 def get_all_users():
     users = db.execute("SELECT * FROM users")
-    if not users:
-        return jsonify({"message": "user not found"}), 400
-    return jsonify(users), 200
+    return render_template("users.html", users=users)
 
 
 
