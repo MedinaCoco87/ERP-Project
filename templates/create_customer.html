@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New Customer
+{% endblock %}
+
+{% block body %}
+<form action="/create_customer" method="post">
+    <div>
+        <input autocomplete="off" autofocus id="company_name" name="company_name" placeholder="Company Name" type="text">
+        <input autocomplete="off" autofocus id="tax_id" name="tax_id" placeholder="Tax ID" type="text">
+    </div>
+    <div>
+        <input autocomplete="off" autofocus id="address_street" name="address_street" placeholder="Street" type="text">
+        <input autocomplete="off" autofocus id="address_city" name="address_city" placeholder="City" type="text">
+        <input autocomplete="off" autofocus id="address_country" name="address_country" placeholder="Country" type="text">
+    </div>
+    <div>
+        <input autocomplete="off" autofocus id="payment_condition" name="payment_condition" placeholder="Payment Condition" type="text">
+        <input autocomplete="off" autofocus id="credit_line" name="credit_line" placeholder="Credit Line" type="text">
+        <input autocomplete="off" autofocus id="available_credit" name="available_credit" placeholder="Available Credit" type="text">
+    </div>
+    <button type="submit">Create</button>
+</form>
+{% endblock %}

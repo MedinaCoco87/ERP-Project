@@ -35,7 +35,6 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# First route of frontend version
 
 @app.route("/", methods = ["GET"])
 @login_required
@@ -62,6 +61,7 @@ def login():
             return render_template("error.html", message="Invalid password")
 
         session["user_id"] = user[0]["id"]
+        session["username"] = user[0]["username"]
         session["profile"] = user[0]["profile"]
         return redirect("/")
 
@@ -76,6 +76,8 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
+
+# Pending implementation
 @app.route("/edit_user", methods = ["GET", "POST"])
 @login_required
 def edit_user(): # Allow super_admin to change other users passwords and profiles
@@ -103,14 +105,7 @@ def change_password():
     
     return render_template("change_password.html")
     
-
-    
-
-
-
-
-# Initial routes to test from postman
-
+  
 @app.route ("/create_user", methods = ["GET", "POST"])
 def create_user():
     if request.method == "POST":
@@ -158,9 +153,6 @@ def create_user():
     
     return render_template("new_user.html")
         
-    
-
-
 
 @app.route ("/users", methods = ["GET"])
 @login_required
@@ -168,8 +160,7 @@ def get_all_users():
     users = db.execute("SELECT * FROM users")
     return render_template("users.html", users=users)
 
-
-
+# Pending vinculation with frontend
 @app.route ("/users/<user_id>", methods = ["GET"])
 def get_user_by_id(user_id):
     user = db.execute("SELECT * FROM users WHERE id = ?", user_id)
@@ -177,17 +168,28 @@ def get_user_by_id(user_id):
         return jsonify({"message": "user not found"}), 400
     return jsonify(user), 200
 
-# I intentionally choose not to allow deletion of users to avoid messing up with databases.
 
-
-@app.route ("/customers", methods = ["POST"])
+@app.route ("/create_customer", methods = ["GET", "POST"])
 def create_customer():
-    customer = request.get_json()
-    db.execute("INSERT INTO customers (company_name, tax_id, address_street, address_city, address_country, payment_condition, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)", customer["company_name"], customer["tax_id"], customer["address_street"], customer["address_city"], customer["address_country"], customer["payment_condition"], customer["created_by"])
-    return jsonify({"message": "customer created"})
+    if request.method == "POST":
+        tax_id = request.form.get("tax_id")
+        existing_customer = db.execute(
+            "SELECT * FROM customers WHERE tax_id = ?", tax_id
+        )
+        if len(existing_customer) >= 1:
+            message = "Tax id already used for customer " + existing_customer[0]["company_name"] 
+            return render_template("error.html", message=message)
+        db.execute("INSERT INTO customers (company_name, tax_id, address_street, address_city, address_country, payment_condition, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+            request.form.get("company_name").upper(), request.form.get("tax_id"), request.form.get("address_street").upper(), request.form.get("address_city").upper(), request.form.get("address_country").upper(), 
+            request.form.get("payment_condition").upper(), session["username"]
+        )
+        customers = db.execute("SELECT * FROM customers")
+        return render_template("customers.html", message="Customer created!", customers=customers)
+
+    return render_template("create_customer.html")
 
 
-
+# Pending vinculation with frontend
 @app.route ("/customers/<customer_id>", methods = ["PUT"])
 def update_customer(customer_id):
     customer_new_data = request.get_json()
@@ -197,7 +199,7 @@ def update_customer(customer_id):
     return jsonify({"message": "user updated"}), 200
 
 
-
+# Pending vinculation with frontend
 @app.route("/customers/<customer_id>", methods = ["GET"])
 def get_customer_by_id(customer_id):
     customer = db.execute("SELECT * FROM customers WHERE id = ?", customer_id)
@@ -213,14 +215,12 @@ def get_customers():
     return render_template("customers.html", customers=customers)
 
 
-
 # Database is validating category_id is an integer between 100 and 999.
 @app.route ("/item_categories", methods = ["POST"])
 def create_category():
     category = request.get_json()
     db.execute("INSERT INTO item_categories (id, description, created_by) VALUES (?, ?, ?)", category["id"], category["description"].upper(), category["created_by"])
     return jsonify({"message": "item_category created"})
-
 
 
 @app.route ("/category_by_id/<item_category>", methods = ["GET"])
