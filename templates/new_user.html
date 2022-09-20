@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New User
+{% endblock %}
+
+{% block body %}
+<form action="/create_user" method="post">
+    <div class="mb-3">
+        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
+    </div>
+    <div class="mb-3">
+        <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+    </div>
+    <div class="mb-3">
+        <input class="form-control mx-auto w-auto" id="confirm_password" name="confirm_password" placeholder="Confirm Password" type="password">
+    </div>
+    <div class="mb-3">
+        <input class="form-control mx-auto w-auto" id="profile" name="profile" placeholder="Profile" type="text">
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+</form>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Users
+{% endblock %}
+
+{% block body %}
+    <p>Users</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Profile</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user["username"] }}</td>
+                <td>{{ user["profile"] }}</td>
+                <td>{{ user["status"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">Home</a>
+{% endblock %}
