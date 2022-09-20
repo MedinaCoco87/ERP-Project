@@ -5,6 +5,7 @@ from flask import Flask, jsonify, redirect, request
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from auxiliary import login_required
 
 
 # Configuring flask app
@@ -37,6 +38,7 @@ def after_request(response):
 # First route of frontend version
 
 @app.route("/", methods = ["GET"])
+@login_required
 def index():
     return render_template("index.html")
 
@@ -75,11 +77,14 @@ def logout():
     return redirect("/login")
 
 @app.route("/edit_user", methods = ["GET", "POST"])
+@login_required
 def edit_user():
     if session["profile"] != super_admin:
         return redirect("change_password.html")
-    else:
-        pass
+    if request.method == "GET":
+            return render_template("edit_user.html")
+    
+        
 
 @app.route("/change_password", methods = ["POST", "GET"])
 def change_password():
