@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Items catalogue
+{% endblock %}
+
+{% block body %}
+    <p>Items</p>
+    <h4>{{ message }}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Full Description</th>
+                <th>UM</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Created by</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item["id"] }}</td>
+                <td>{{ item["description"] }}</td>
+                <td>{{ item["full_description"] }}</td>
+                <td>{{ item["um"] }}</td>
+                <td>{{ item["category_id"] }}</td>
+                <td>{{ item["status"] }}</td>
+                <td>{{ item["created_by"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form method="get" action="/create_item">
+        <button type="submit">New Item</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}

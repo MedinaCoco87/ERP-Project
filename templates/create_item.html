@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New User
+{% endblock %}
+
+{% block body %}
+<form action="/create_item" method="post">
+    <div>
+        <input type="number" min="100" max="999" id="category_id" name="category_id" placeholder="Category ID">
+    </div>
+    <div>
+        <input type="tex" id="description" name="description" placeholder="Description">
+    </div>
+    <div>
+        <input type="tex" id="full_description" name="full_description" placeholder="Full Description">
+    </div>
+    <button type="submit">Create</button>
+</form>
+<form method="get" action="/">
+    <button type="submit">Home</button>
+</form>
+{% endblock %}
