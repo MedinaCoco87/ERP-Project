@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sales Orders
+{% endblock %}
+
+{% block body %}
+    <p>List of Sales Orders</p>
+    <h4>{{ message }}</h4>
+    <form action="/sorder_details" method="get">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order_num</th>
+                    <th>Date</th>
+                    <th>Customer ID</th>
+                    <th>Company Name</th>
+                    <th>Total Net Value</th>
+                    <th>Status</th>
+                    <th>Created by</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sorder in sorders %}
+                <tr>
+                    <td>{{ sorder["order_num"] }}</td>
+                    <td>{{ sorder["date"] }}</td>
+                    <td>{{ sorder["customer_id"] }}</td>
+                    <td>Company Name</td>
+                    <td>{{ sorder["total_net_value"] }}</td>
+                    <td>{{ sorder["status"] }}</td>
+                    <td>{{ sorder["created_by"] }}</td>
+                    <td>    
+                        <button name="sorder_num" value="{{ sorder['order_num'] }}" type="submit">Details</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">New Sale</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}
