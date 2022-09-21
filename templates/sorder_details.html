@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sales Order
+{% endblock %}
+
+{% block body %}
+    <h1>Sales Order Details</h1>
+    <div>
+        <h4>Order Num. {{ header[0]["order_num"] }}</h4>
+        <h4>{{ header[0]["date"] }}</h4>
+    </div>
+    <div>
+        <h4>Customer ID: {{ header[0]["customer_id"] }}</h4>
+        <h4>Company Name</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Line</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Net Price</th>
+                <th>Net Total</th>
+                <th>Delivery Date</th>
+                <th>Status</th>
+                <th>Quote #</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for body in bodies %}
+            <tr>
+                <td>{{ body["line_ref"] }}</td>
+                <td>{{ body["item_id"] }}</td>
+                <td>Item description</td>
+                <td>{{ body["quantity"] }}</td>
+                <td>{{ body["net_price"] }}</td>
+                <td>Net total</td>
+                <td>{{ body["delivery_date"] }}</td>
+                <td>{{ body["status"] }}</td>
+                <td>{{ body["quote_num"] }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>{{ header[0]["total_net_value"] }}</td>
+                <td></td>
+                <td></td>
+                <td></td>    
+        </tbody>
+    </table>
+    <form method="get" action="/">
+        <button type="submit">Delivery</button>
+    </form>
+    <form method="get" action="/get_all_sorders">
+        <button type="submit">Back to Orders</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}

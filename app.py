@@ -322,6 +322,7 @@ def get_quote_details():
     return render_template("quote_details.html", header=header, bodies=bodies)
 
 
+# Pending implementation in frontend
 @app.route ("/create_quote", methods = ["POST"])
 def create_quote():
     # Get the full json data
@@ -353,7 +354,7 @@ def create_quote():
     return jsonify({"message": "quote created"})
 
 
-
+# Pending implementation in frontend
 @app.route("/get_quote_by_id/<quote_id>", methods = ["GET"])
 def get_quote_by_id(quote_id):
     quote_header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
@@ -363,7 +364,7 @@ def get_quote_by_id(quote_id):
 
 
 
-
+# Pending implementation in frontend
 @app.route("/get_quotes_by_customerId/<customer_id>", methods = ["GET"])
 def get_quotes_by_customer(customer_id):
     # Get all the quote_headers for this customer
@@ -396,7 +397,7 @@ def get_quotes_by_customer_name():
         return jsonify({"message": "must provide body"})
 
 
-
+# Pending implementation in frontend
 @app.route("/convert_quote_to_sorder", methods = ["POST"])
 def convert_quote_to_sorder():
     sorder_input = request.get_json()
@@ -471,6 +472,7 @@ def convert_quote_to_sorder():
     )
 
 
+# Pending implementation in frontend
 @app.route("/partial_quote_to_sorder", methods = ["POST"])
 def partial_quote_to_sorder():
     user_input = request.get_json()
@@ -550,14 +552,23 @@ def partial_quote_to_sorder():
 # Get all sales orders
 @app.route("/get_all_sorders", methods = ["GET"])
 def get_all_sorders():
-    sorder_headers = db.execute("SELECT * FROM sorder_header")
+    sorders = db.execute("SELECT * FROM sorder_header")
+    return render_template("sorders_list.html", sorders=sorders)
     # Get me an empty list to store all the sorderss as dictionaries
-    sorders = []
+    #sorders = []
     # For each order_num in header, get all the sorder_body rows with that same order_num
-    for i in range(len(sorder_headers)):
-        sorder_body = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_headers[i]["order_num"])
-        sorders.append({"1_sorder_header": sorder_headers[i], "2_sorder_body": sorder_body})
-    return jsonify(sorders)
+    #for i in range(len(sorder_headers)):
+        #sorder_body = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_headers[i]["order_num"])
+        #sorders.append({"1_sorder_header": sorder_headers[i], "2_sorder_body": sorder_body})
+    #return jsonify(sorders)
+
+
+@app.route("/sorder_details", methods=["GET"])
+def get_sorder_details():
+    sorder_id = request.args.get("sorder_num")
+    header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", sorder_id)
+    bodies = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_id)
+    return render_template("sorder_details.html", header=header, bodies=bodies)
 
 
 @app.route("/get_sorder_by_id/<sorder_id>", methods = ["GET"])
