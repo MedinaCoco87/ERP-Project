@@ -794,6 +794,21 @@ def validate_delivery():
 
     return jsonify({"message": "delivery validation ok"})
 
+@app.route("/get_all_invoices", methods=["GET"])
+def get_all_invoices():
+    invoices = db.execute("SELECT * FROM invoice_header")
+    return render_template("invoices.html", invoices=invoices)
+
+@app.route("/invoice_details", methods=["GET"])
+def get_invoice_details():
+    invoice_num = request.args.get("invoice_num")
+    header = db.execute(
+        "SELECT * FROM invoice_header WHERE invoice_num = ?", invoice_num
+    )
+    bodies = db.execute(
+        "SELECT * FROM invoice_body WHERE invoice_num = ?", invoice_num
+    )
+    return render_template("invoice_details.html", header=header, bodies=bodies)
 
 
 

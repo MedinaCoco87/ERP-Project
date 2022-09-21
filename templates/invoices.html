@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Invoices
+{% endblock %}
+
+{% block body %}
+    <p>Invoices</p>
+    <h4>{{ message }}</h4>
+    <form action="/invoice_details" method="get">
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice_num</th>
+                    <th>Date</th>
+                    <th>Customer ID</th>
+                    <th>Company Name</th>
+                    <th>Total Net Value</th>
+                    <th>Tax Amount</th>
+                    <th>Payment Terms</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Created by</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice["invoice_num"] }}</td>
+                    <td>{{ invoice["date"] }}</td>
+                    <td>{{ invoice["customer_id"] }}</td>
+                    <td>Company Name</td>
+                    <td>{{ invoice["total_net_value"] }}</td>
+                    <td>{{ invoice["total_tax_amount"] }}</td>
+                    <td>{{ invoice["payment_terms"] }}</td>
+                    <td>{{ invoice["due_date"] }}</td>
+                    <td>{{ invoice["status"] }}</td>
+                    <td>{{ invoice["created_by"] }}</td>
+                    <td>    
+                        <button name="invoice_num" value="{{ invoice['invoice_num'] }}" type="submit">Details</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">New Invoice</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}
