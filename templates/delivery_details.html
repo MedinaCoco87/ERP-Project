@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Delivery
+{% endblock %}
+
+{% block body %}
+    <h1>Delivery Details</h1>
+    <div>
+        <h4>Delivery Num. {{ header[0]["id"] }}</h4>
+        <h4>{{ header[0]["date"] }}</h4>
+    </div>
+    <div>
+        <h4>Customer ID: {{ header[0]["customer_id"] }}</h4>
+        <h4>Company Name</h4>
+    </div>
+    <div>
+        <h4>Delivery Address: {{ header[0]["delivery_address"] }}</h4>
+        <h4>Status: {{ header[0]["status"] }}</h4>
+        <h4>Created by: {{ header[0]["created_by"] }}</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Line</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Order Num.</th>
+                <th>Invoice Num.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for body in bodies %}
+            <tr>
+                <td>{{ body["line_ref"] }}</td>
+                <td>{{ body["item_id"] }}</td>
+                <td>Item description</td>
+                <td>{{ body["quantity"] }}</td>
+                <td>{{ body["sorder_num"] }}</td>
+                <td>{{ header[0]["invoice_num"] }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Total Value: {{ header[0]["total_net_value"] }}</td>
+                <td></td>
+                <td></td>
+                <td></td>    
+        </tbody>
+    </table>
+    <form method="get" action="/">
+        <button type="submit">Invoice</button>
+    </form>
+    <form method="get" action="/list_of_deliveries">
+        <button type="submit">Back to Deliveries</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}
