@@ -668,6 +668,23 @@ def negative_stock_adjustment():
     return jsonify({"message": "success"}), 200
 
 
+@app.route("/list_of_deliveries", methods=["GET"])
+def list_deliveries():
+    deliveries = db.execute("SELECT * FROM delivery_header")
+    return render_template("list_of_deliveries.html", deliveries=deliveries)
+
+@app.route("/delivery_details", methods=["GET"])
+def delivery_details():
+    delivery_id = request.args.get("delivery_id")
+    header = db.execute(
+        "SELECT * FROM delivery_header WHERE id = ?", delivery_id
+    )
+    bodies = db.execute(
+        "SELECT * FROM delivery_body WHERE id = ?", delivery_id
+    )
+    return render_template("delivery_details.html", header=header, bodies=bodies)
+
+
 @app.route("/create_delivery", methods = ["POST"])
 def create_delivery():
     user_input = request.get_json()
