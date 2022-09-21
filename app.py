@@ -282,7 +282,7 @@ def create_item():
 
 
 
-
+# Pending vinculation to frontend
 @app.route ("/items/<item_id>", methods = ["GET"])
 def get_item_by_id(item_id):
     item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
@@ -292,7 +292,7 @@ def get_item_by_id(item_id):
 
 
 
-
+# Pending vinculation to frontend
 @app.route ("/items_by_category/<category_id>", methods = ["GET"])
 def get_items_by_category(category_id):
     items = db.execute("SELECT * FROM items WHERE category_id = ?", category_id)
@@ -301,6 +301,25 @@ def get_items_by_category(category_id):
     return jsonify(items), 200
 
 
+
+@app.route("/get_quotes_list", methods = ["GET"])
+def get_all_quotes():
+    quotes = db.execute("SELECT * FROM quote_header")
+    return render_template("quotes_list.html", quotes=quotes)
+    # Get me an empty list to store all the quotes as dictionaries
+    #quotes = []
+    # For each quote_num in header, get me all the body rows with that same quote_num
+    #for i in range(len(quote_headers)):
+        #quote_body = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_headers[i]["quote_num"])
+        #quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
+    #return jsonify(quotes)
+
+@app.route("/quote_details", methods=["GET"])
+def get_quote_details():
+    quote_id = request.args.get("quote_num")
+    header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+    bodies = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_id)
+    return render_template("quote_details.html", header=header, bodies=bodies)
 
 
 @app.route ("/create_quote", methods = ["POST"])
@@ -332,21 +351,6 @@ def create_quote():
         full_net_total[0]["SUM(line_net_total)"], quote_number
     )
     return jsonify({"message": "quote created"})
-
-
-
-
-@app.route("/get_all_quotes", methods = ["GET"])
-def get_all_quotes():
-    quote_headers = db.execute("SELECT * FROM quote_header")
-    # Get me an empty list to store all the quotes as dictionaries
-    quotes = []
-    # For each quote_num in header, get me all the body rows with that same quote_num
-    for i in range(len(quote_headers)):
-        quote_body = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_headers[i]["quote_num"])
-        quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
-    return jsonify(quotes)
-
 
 
 
