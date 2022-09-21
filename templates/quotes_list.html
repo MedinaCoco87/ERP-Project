@@ -7,35 +7,36 @@
 {% block body %}
     <p>List of Quotes</p>
     <h4>{{ message }}</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Quote_num</th>
-                <th>Date</th>
-                <th>Customer ID</th>
-                <th>Company Name</th>
-                <th>Total Net Value</th>
-                <th>Created by</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for quote in quotes %}
-            <tr>
-                <td>{{ quote["quote_num"] }}</td>
-                <td>{{ quote["date"] }}</td>
-                <td>{{ quote["customer_id"] }}</td>
-                <td>Company Name</td>
-                <td>{{ quote["total_net_value"] }}</td>
-                <td>{{ quote["created_by"] }}</td>
-                <td>    
-                    <form method="get" action="/quote_details">
-                        <button type="submit">Detail</button>
-                    </form></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form action="/quote_details" method="get">
+        <table>
+            <thead>
+                <tr>
+                    <th>Quote_num</th>
+                    <th>Date</th>
+                    <th>Customer ID</th>
+                    <th>Company Name</th>
+                    <th>Total Net Value</th>
+                    <th>Created by</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quote in quotes %}
+                <tr>
+                    <td>{{ quote["quote_num"] }}</td>
+                    <td>{{ quote["date"] }}</td>
+                    <td>{{ quote["customer_id"] }}</td>
+                    <td>Company Name</td>
+                    <td>{{ quote["total_net_value"] }}</td>
+                    <td>{{ quote["created_by"] }}</td>
+                    <td>    
+                        <button name="quote_num" value="{{ quote['quote_num'] }}" type="submit">Detail</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
     <form method="get" action="/new_quote">
         <button type="submit">New Quote</button>
     </form>

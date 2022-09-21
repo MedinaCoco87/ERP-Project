@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote Details
+{% endblock %}
+
+{% block body %}
+    <h1>Quote Details</h1>
+    <div>
+        <h4>Quote Num. {{ header[0]["quote_num"] }}</h4>
+        <h4>{{ header[0]["date"] }}</h4>
+    </div>
+    <div>
+        <h4>Customer ID: {{ header[0]["customer_id"] }}</h4>
+        <h4>Company Name</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Line</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>List Price</th>
+                <th>Discount</th>
+                <th>Net Total</th>
+                <th>Lead Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for body in bodies %}
+            <tr>
+                <td>{{ body["line_ref"] }}</td>
+                <td>{{ body["item_id"] }}</td>
+                <td>Item description</td>
+                <td>{{ body["quantity"] }}</td>
+                <td>{{ body["list_price"] }}</td>
+                <td>{{ body["discounts"] }}</td>
+                <td>{{ body["line_net_total"] }}</td>
+                <td>{{ body["lead_time"] }}</td>
+                <td>{{ body["status"] }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>{{ header[0]["total_net_value"] }}</td>
+                <td></td>
+                <td></td>    
+        </tbody>
+    </table>
+    <form method="get" action="/create_customer">
+        <button type="submit">Convert</button>
+    </form>
+    <form method="get" action="/get_quotes_list">
+        <button type="submit">Back to Quotes</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}

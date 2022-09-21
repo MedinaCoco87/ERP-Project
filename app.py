@@ -314,6 +314,13 @@ def get_all_quotes():
         #quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
     #return jsonify(quotes)
 
+@app.route("/quote_details", methods=["GET"])
+def get_quote_details():
+    quote_id = request.args.get("quote_num")
+    header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+    bodies = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_id)
+    return render_template("quote_details.html", header=header, bodies=bodies)
+
 
 @app.route ("/create_quote", methods = ["POST"])
 def create_quote():
