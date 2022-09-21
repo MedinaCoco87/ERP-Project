@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Stock Movements
+{% endblock %}
+
+{% block body %}
+    <h2>Stock Movements</h2>
+    <h4>{{ message }}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Stock Before</th>
+                <th>Stock After</th>
+                <th>Reference</th>
+                <th>Customer ID</th>
+                <th>Invoice</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for move in moves %}
+            <tr>
+                <td>{{ move["id"] }}</td>
+                <td>{{ move["date"] }}</td>
+                <td>{{ move["item_id"] }}</td>
+                <td>{{ move["item_description"] }}</td>
+                <td>{{ move["quantity"] }}</td>
+                <td>{{ move["stock_bef"] }}</td>
+                <td>{{ move["stock_aft"] }}</td>
+                <td>{{ move["reference"] }}</td>
+                <td>{{ move["customer_id"] }}</td>
+                <td>{{ move["invoice_id"] }}</td>
+                <td>{{ move["user_id"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form method="get" action="/current_stock">
+        <button type="submit">Stock</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}

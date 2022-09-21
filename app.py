@@ -794,6 +794,18 @@ def validate_delivery():
 
     return jsonify({"message": "delivery validation ok"})
 
+
+@app.route("/current_stock", methods=["GET"])
+def get_current_stock():
+    stocks = db.execute("SELECT * FROM stock")
+    return render_template("current_stock.html", stocks=stocks)
+
+@app.route("/stock_movement", methods=["GET"])
+def get_stock_movements():
+    moves = db.execute("SELECT * FROM stock_moves")
+    return render_template("stock_movements.html", moves=moves)
+
+
 @app.route("/get_all_invoices", methods=["GET"])
 def get_all_invoices():
     invoices = db.execute("SELECT * FROM invoice_header")
