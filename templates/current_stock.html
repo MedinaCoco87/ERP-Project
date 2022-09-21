@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Stock
+{% endblock %}
+
+{% block body %}
+    <h2>Current Stock x Item</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Company Name</th>
+                <th>Total</th>
+                <th>Approved</th>
+                <th>In QC</th>
+                <th>Rejected</th>
+                <th>On Sale</th>
+                <th>Incoming</th>
+                <th>Available</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock["category_id"] }}</td>
+                <td>{{ stock["item_id"] }}</td>
+                <td>{{ stock["item_description"] }}</td>
+                <td>{{ stock["item_description"] }}</td>
+                <td>{{ stock["stock_total"] }}</td>
+                <td>{{ stock["stock_approved"] }}</td>
+                <td>{{ stock["stock_in_qc"] }}</td>
+                <td>{{ stock["stock_rejected"] }}</td>
+                <td>{{ stock["stock_onsale"] }}</td>
+                <td>{{ stock["stock_incoming"] }}</td>
+                <td>{{ stock["stock_available"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form method="get" action="/">
+        <button type="submit">Add Stock</button>
+    </form>
+    <form method="get" action="/">
+        <button type="submit">Home</button>
+    </form>
+{% endblock %}
