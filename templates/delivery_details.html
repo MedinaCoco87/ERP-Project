@@ -5,22 +5,22 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Delivery Details</h1>
+    <h1 class="text-center">Delivery Details</h1>
     <div>
-        <h4>Delivery Num. {{ header[0]["id"] }}</h4>
-        <h4>{{ header[0]["date"] }}</h4>
+        <div class="h6">Date: {{ header[0]["date"] }}</div>
+        <div class="h6">Delivery Num. {{ header[0]["id"] }}</div>
     </div>
     <div>
-        <h4>Customer ID: {{ header[0]["customer_id"] }}</h4>
-        <h4>Company Name</h4>
+        <div class="h6" style="display: inline-block; padding-right: 40px">Customer ID: {{ header[0]["customer_id"] }}</div>
+        <div class="h6" style="display: inline-block; padding-left: 40px">Company Name</div>
+        <div class="h6" style="display: inline-block; padding-left: 40px;">Delivery Address: {{ header[0]["delivery_address"] }}</div>
     </div>
     <div>
-        <h4>Delivery Address: {{ header[0]["delivery_address"] }}</h4>
-        <h4>Status: {{ header[0]["status"] }}</h4>
-        <h4>Created by: {{ header[0]["created_by"] }}</h4>
+        <div class="h6" style="display: inline-block; padding-right: 40px">Status: {{ header[0]["status"] }}</div>
+        <div class="h6" style="display: inline-block; padding-left: 40px">Created by: {{ header[0]["created_by"] }}</div>
     </div>
-    <table>
-        <thead>
+    <table class="table text-center">
+        <thead class="table-light">
             <tr>
                 <th>Line</th>
                 <th>Item</th>
@@ -48,9 +48,6 @@
                 <td></td>
                 <td></td>
                 <td>Total Value: {{ header[0]["total_net_value"] }}</td>
-                <td></td>
-                <td></td>
-                <td></td>    
         </tbody>
     </table>
     <form method="get" action="/">
