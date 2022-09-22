@@ -5,19 +5,28 @@
 {% endblock %}
 
 {% block body %}
-<form action="/create_user" method="post">
+<div style="padding-top: 10px; padding-left: 10px;">
+    <h4>Create User</h4>
+</div>
+<form action="/create_user" method="post" style="padding: 10px">
     <div class="mb-3">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
+        <input autocomplete="off" autofocus class="form-control w-auto" id="username" name="username" placeholder="Username" type="text">
     </div>
     <div class="mb-3">
-        <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+        <input class="form-control w-auto" id="password" name="password" placeholder="Password" type="password">
     </div>
     <div class="mb-3">
-        <input class="form-control mx-auto w-auto" id="confirm_password" name="confirm_password" placeholder="Confirm Password" type="password">
+        <input class="form-control w-auto" id="confirm_password" name="confirm_password" placeholder="Confirm Password" type="password">
     </div>
     <div class="mb-3">
-        <input class="form-control mx-auto w-auto" id="profile" name="profile" placeholder="Profile" type="text">
+        <input class="form-control w-auto" id="profile" name="profile" placeholder="Profile" type="text">
     </div>
-    <button class="btn btn-primary" type="submit">Create</button>
+    <button class="btn btn-danger" type="submit">Create</button>
+</form>
+<form method="get" action="/users" style="padding-left: 10px; padding-bottom: 10px;">
+    <button class="btn btn-warning" type="submit">Back to Users</button>
+</form>
+<form method="get" action="/" style="padding-left: 10px;">
+    <button class="btn btn-secondary" type="submit">Home</button>
 </form>
 {% endblock %}

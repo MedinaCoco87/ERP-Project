@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-    <h2 style="text-align: center">Customers</h2>
+    <h2 style="text-align: center; padding: 10px">Customers</h2>
     <h4>{{ message }}</h4>
     <table class="table" style="text-align: center">
         <thead class="table-light">
@@ -39,10 +39,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <form method="get" action="/create_customer">
-        <button type="submit">New Customer</button>
+    <form method="get" action="/create_customer" style="padding: 5px">
+        <button class="btn btn-info" type="submit">New Customer</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 5px">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}
