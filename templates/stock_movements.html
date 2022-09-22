@@ -41,10 +41,12 @@
             {% endfor %}
         </tbody>
     </table>
-    <form method="get" action="/current_stock">
-        <button type="submit">Stock</button>
-    </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
-    </form>
+    <div style="padding: 10px;">
+        <form style="display: inline-block;" method="get" action="/current_stock">
+            <button class="btn btn-success" type="submit">Stock</button>
+        </form>
+        <form method="get" action="/" form style="display: inline-block;">
+            <button class="btn btn-secondary" type="submit">Home</button>
+        </form>
+    </div>
 {% endblock %}
