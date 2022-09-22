@@ -54,13 +54,14 @@
                 <td></td>    
         </tbody>
     </table>
-    <form method="get" action="/">
+    <form method="get" action="/" style="padding: 3px;">
         <button type="submit">Delivery</button>
+        <!-- Add class="btn btn-danger" when route fully implemented-->
     </form>
-    <form method="get" action="/get_all_sorders">
-        <button type="submit">Back to Orders</button>
+    <form method="get" action="/get_all_sorders" style="padding: 3px;">
+        <button class="btn btn-warning" type="submit">Back to Orders</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

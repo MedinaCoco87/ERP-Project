@@ -5,42 +5,46 @@
 {% endblock %}
 
 {% block body %}
-    <h3>CDM Homepage</h3>
-    <p>Manage your Deals</p>
-    <form method="get" action="/logout">
-        <button class="btn btn-primary" type="submit">Log Out</button>
-    </form>
-    <form method="get" action="/change_password">
-        <button class="btn btn-primary" type="submit">Change Password</button>
-    </form>
-    <form method="get" action="/users">
-        <button class="btn btn-primary" type="submit">Users</button>
-    </form>
-    <form method="get" action="/customers">
-        <button class="btn btn-primary" type="submit">Customers</button>
-    </form>
-    <form method="get" action="/get_item_categories">
-        <button class="btn btn-primary" type="submit">Categories</button>
-    </form>
-    <form method="get" action="/get_items">
-        <button class="btn btn-primary" type="submit">Items</button>
-    </form>
-    <form method="get" action="/current_stock">
-        <button class="btn btn-primary" type="submit">Stock</button>
-    </form>
-    <form method="get" action="/stock_movement">
-        <button class="btn btn-primary" type="submit">Stock Movements</button>
-    </form>
-    <form method="get" action="/get_quotes_list">
-        <button class="btn btn-primary" type="submit">Quotes</button>
-    </form>
-    <form method="get" action="/get_all_sorders">
-        <button class="btn btn-primary" type="submit">Sales Orders</button>
-    </form>
-    <form method="get" action="/list_of_deliveries">
-        <button class="btn btn-primary" type="submit">Deliveries</button>
-    </form>
-    <form method="get" action="/get_all_invoices">
-        <button class="btn btn-primary" type="submit">Invoices</button>
-    </form>
+    <div style="padding-left: 10px; padding-top: 5px;">
+        <h3>Welcome to CDM!</h3>
+        <p>We manage your deals</p>
+    </div>
+    <div style="padding-left: 10px;">
+        <form method="get" action="/logout" style="padding: 2px;">
+            <button class="btn btn-danger" type="submit">Log Out</button>
+        </form>
+        <form method="get" action="/change_password" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Change Password</button>
+        </form>
+        <form method="get" action="/users" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Users</button>
+        </form>
+        <form method="get" action="/customers" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Customers</button>
+        </form>
+        <form method="get" action="/get_item_categories" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Categories</button>
+        </form>
+        <form method="get" action="/get_items" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Items</button>
+        </form>
+        <form method="get" action="/current_stock" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Stock</button>
+        </form>
+        <form method="get" action="/stock_movement" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Stock Movements</button>
+        </form>
+        <form method="get" action="/get_quotes_list" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Quotes</button>
+        </form>
+        <form method="get" action="/get_all_sorders" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Sales Orders</button>
+        </form>
+        <form method="get" action="/list_of_deliveries" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Deliveries</button>
+        </form>
+        <form method="get" action="/get_all_invoices" style="padding: 2px;">
+            <button class="btn btn-primary" type="submit">Invoices</button>
+        </form>
+    </div>
 {% endblock %}

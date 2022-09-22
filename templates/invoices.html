@@ -38,17 +38,17 @@
                     <td>{{ invoice["status"] }}</td>
                     <td>{{ invoice["created_by"] }}</td>
                     <td>    
-                        <button name="invoice_num" value="{{ invoice['invoice_num'] }}" type="submit">Details</button>
+                        <button class="btn btn-success" name="invoice_num" value="{{ invoice['invoice_num'] }}" type="submit">Details</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </form>
-    <form method="get" action="/">
-        <button type="submit">New Invoice</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-info" type="submit">New Invoice</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}
