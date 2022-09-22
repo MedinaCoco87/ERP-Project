@@ -54,13 +54,14 @@
                 <td></td>    
         </tbody>
     </table>
-    <form method="get" action="/">
-        <button type="submit">Revert</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button type="submit">Revert Invoice</button>
+        <!-- Add class="btn btn-danger" when route is fully implemented-->
     </form>
-    <form method="get" action="/get_all_invoices">
-        <button type="submit">Back to Invoices</button>
+    <form method="get" action="/get_all_invoices" style="padding: 3px;">
+        <button class="btn btn-warning" type="submit">Back to Invoices</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

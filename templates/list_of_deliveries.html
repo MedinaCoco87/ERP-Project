@@ -34,17 +34,18 @@
                     <td>{{ delivery["status"] }}</td>
                     <td>{{ delivery["invoice_num"] }}</td>
                     <td>    
-                        <button name="delivery_id" value="{{ delivery['id'] }}" type="submit">Details</button>
+                        <button class="btn btn-success" name="delivery_id" value="{{ delivery['id'] }}" type="submit">Details</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </form>
-    <form method="get" action="/">
+    <form method="get" action="/" style="padding: 3px;">
         <button type="submit">New Delivery</button>
+        <!-- Add class="btn btn-info" when route fully implemented-->
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

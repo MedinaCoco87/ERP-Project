@@ -50,13 +50,14 @@
                 <td>Total Value: {{ header[0]["total_net_value"] }}</td>
         </tbody>
     </table>
-    <form method="get" action="/">
+    <form method="get" action="/" style="padding: 3px;">
         <button type="submit">Invoice</button>
+        <!-- Add class="btn btn-danger" when route fully implemented-->
     </form>
-    <form method="get" action="/list_of_deliveries">
-        <button type="submit">Back to Deliveries</button>
+    <form method="get" action="/list_of_deliveries" style="padding: 3px;">
+        <button class="btn btn-warning" type="submit">Back to Deliveries</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

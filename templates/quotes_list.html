@@ -30,17 +30,18 @@
                     <td>{{ quote["total_net_value"] }}</td>
                     <td>{{ quote["created_by"] }}</td>
                     <td>    
-                        <button name="quote_num" value="{{ quote['quote_num'] }}" type="submit">Detail</button>
+                        <button class="btn btn-success" name="quote_num" value="{{ quote['quote_num'] }}" type="submit">Details</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </form>
-    <form method="get" action="/new_quote">
+    <form method="get" action="/" style="padding: 2px">
         <button type="submit">New Quote</button>
+        <!--Add class="btn btn-info" when route fully implemented-->
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 2px">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

@@ -54,13 +54,14 @@
                 <td></td>    
         </tbody>
     </table>
-    <form method="get" action="/create_customer">
+    <form method="get" action="/" style="padding: 3px">
         <button type="submit">Convert</button>
+        <!-- Add class="btn btn-outline-danger" when route fully implemented-->
     </form>
-    <form method="get" action="/get_quotes_list">
-        <button type="submit">Back to Quotes</button>
+    <form method="get" action="/get_quotes_list" style="padding: 3px">
+        <button class="btn btn-warning" type="submit">Back to Quotes</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding: 3px">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}
