@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block body %}
-    <p>List of Deliveries</p>
+    <h2 class="text-center">Deliveries</h2>
     <h4>{{ message }}</h4>
     <form action="/delivery_details" method="get">
-        <table>
-            <thead>
+        <table class="table text-center">
+            <thead class="table-light">
                 <tr>
                     <th>Date</th>
                     <th>Delivery ID</th>
@@ -19,6 +19,7 @@
                     <th>Created by</th>
                     <th>Status</th>
                     <th>Invoice Num.</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
