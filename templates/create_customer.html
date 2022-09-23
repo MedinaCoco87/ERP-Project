@@ -5,24 +5,32 @@
 {% endblock %}
 
 {% block body %}
-<form action="/create_customer" method="post">
-    <div>
-        <input autocomplete="off" autofocus id="company_name" name="company_name" placeholder="Company Name" type="text">
-        <input autocomplete="off" autofocus id="tax_id" name="tax_id" placeholder="Tax ID" type="text">
-    </div>
-    <div>
-        <input autocomplete="off" autofocus id="address_street" name="address_street" placeholder="Street" type="text">
-        <input autocomplete="off" autofocus id="address_city" name="address_city" placeholder="City" type="text">
-        <input autocomplete="off" autofocus id="address_country" name="address_country" placeholder="Country" type="text">
-    </div>
-    <div>
-        <input autocomplete="off" autofocus id="payment_condition" name="payment_condition" placeholder="Payment Condition" type="text">
-        <input autocomplete="off" autofocus id="credit_line" name="credit_line" placeholder="Credit Line" type="text">
-        <input autocomplete="off" autofocus id="available_credit" name="available_credit" placeholder="Available Credit" type="text">
-    </div>
-    <button type="submit">Create</button>
+<div class="h4" style="padding-left:10px; padding-top: 10px;">New customer</div>
+<div style="padding: 10px">
+    <form action="/create_customer" method="post">
+        <div>
+            <input autocomplete="off" autofocus id="company_name" name="company_name" placeholder="Company Name" type="text">
+            <input autocomplete="off" autofocus id="tax_id" name="tax_id" placeholder="Tax ID" type="text">
+        </div>
+        <div>
+            <input autocomplete="off" autofocus id="address_street" name="address_street" placeholder="Street" type="text">
+            <input autocomplete="off" autofocus id="address_city" name="address_city" placeholder="City" type="text">
+            <input autocomplete="off" autofocus id="address_country" name="address_country" placeholder="Country" type="text">
+        </div>
+        <div>
+            <input autocomplete="off" autofocus id="payment_condition" name="payment_condition" placeholder="Payment Condition" type="text">
+            <input autocomplete="off" autofocus id="credit_line" name="credit_line" placeholder="Credit Line" type="text">
+            <input autocomplete="off" autofocus id="available_credit" name="available_credit" placeholder="Available Credit" type="text">
+        </div>
+        <div style="margin-top: 10px;">
+            <button class="btn btn-danger" style="padding-top: 5px" type="submit">Create</button>
+        </div>  
+    </form>
+</div>
+<form method="get" action="/customers" style="padding-left: 10px;">
+    <button class="btn btn-warning" type="submit">Back to Customers</button>
 </form>
-<form method="get" action="/">
-    <button type="submit">Home</button>
+<form method="get" action="/" style="padding-left: 10px; margin-top: 5px;">
+    <button class="btn btn-secondary" type="submit">Home</button>
 </form>
 {% endblock %}

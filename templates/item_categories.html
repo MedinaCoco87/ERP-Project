@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Item categories</h2>
+    <div class="h2" style="padding: 10px">Item categories</div>
     <h4>{{ message }}</h4>
     <table class="table" style="text-align: center; max-width: 600px">
         <thead class="table-light">
@@ -25,10 +25,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <form method="get" action="/create_category">
-        <button type="submit">Add Category</button>
+    <form method="get" action="/create_category" style="padding: 10px;">
+        <button class="btn btn-info" type="submit">Add Category</button>
     </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
+    <form method="get" action="/" style="padding-left: 10px; padding-top: 5px;">
+        <button class="btn btn-secondary" type="submit">Home</button>
     </form>
 {% endblock %}

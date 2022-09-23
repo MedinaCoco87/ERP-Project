@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block body %}
-    <h2 style="text-align: center">Current Stock x Item</h2>
-    <table class="table" style="text-align: center">
+    <div class="h4" style="text-align: center; padding: 5px;">Current Stock x Item</div>
+    <table class="table" style="text-align: center; margin-bottom: 6px;">
         <thead class="table-light">
             <tr>
                 <th>Category</th>
@@ -40,10 +40,17 @@
             {% endfor %}
         </tbody>
     </table>
-    <form method="get" action="/">
-        <button type="submit">Add Stock</button>
-    </form>
-    <form method="get" action="/">
-        <button type="submit">Home</button>
-    </form>
+    <div style="padding-left: 10px; margin-top: 0px">
+        <form style="display: inline-block; padding-right: 5px;" method="get" action="/">
+            <button type="submit">+ Adjustment</button>
+            <!-- Add class="btn btn-info btn-sm"  when route is fully implemented-->
+        </form>
+        <form style="display: inline-block; padding-right: 5px;" method="get" action="/">
+            <button type="submit">- Adjustment</button>
+            <!-- Add class="btn btn-info btn-sm"  when route is fully implemented-->
+        </form>
+        <form style="display: inline-block; padding-right: 5px;" method="get" action="/">
+            <button class="btn btn-secondary btn-sm" type="submit">Home</button>
+        </form>
+    </div>
 {% endblock %}

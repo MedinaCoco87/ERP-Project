@@ -104,8 +104,9 @@ def change_password():
         return render_template("success.html", message="Password succesfully changed")
     
     return render_template("change_password.html")
+
     
-  
+# Test POST route for invalid inputs
 @app.route ("/create_user", methods = ["GET", "POST"])
 def create_user():
     if request.method == "POST":

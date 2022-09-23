@@ -5,13 +5,22 @@
 {% endblock %}
 
 {% block body %}
-<form action="/create_category" method="post">
-    <div>
+<div class="h4" style="padding: 10px;">Create Category</div>
+<form action="/create_category" method="post" style="padding-left: 10px;">
+    <div style="margin-bottom: 5px;">
         <input autocomplete="off" autofocus id="id" name="category_id" placeholder="ID" type="number" min="101" max="999">
     </div>
-    <div>
+    <div style="margin-bottom: 5px;">
         <input id="description" name="description" placeholder="Description" type="text">
     </div>
-    <button type="submit">Create</button>
+    <div style="margin-top: 5px;">
+        <button class="btn btn-danger" type="submit">Create</button>
+    </div>
+</form>
+<form action="/get_item_categories" style="margin-top: 5px; padding-left: 10px;">
+    <button class="btn btn-warning" type="submit">Back</button>
+</form>
+<form action="/" style="margin-top: 5px; padding-left: 10px;">
+    <button class="btn btn-secondary" type="submit">Home</button>
 </form>
 {% endblock %}
