@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New Quote
+{% endblock %}
+
+{% block body %}
+
+    <div class="h2 text-center">New Quote</div>
+    <form action="/new_quote" method="post">
+        <div>
+            <input type="date" max="2022-09-23" Style="max-width: 110px;">
+            <!--Add js code to make it "max=today"-->
+        </div>
+        <div>
+            <input type="text" name="quote_id" id="quote_id" placeholder="Quote No." disabled style="max-width: 110px;">
+        </div> <!-- Bring the quote number once is created-->
+        <div class="flex-container">
+            <input type="text" name="customer_id" placeholder="Customer No." style="max-width: 110px;">
+            <!-- Chech the user provides a valid customer number with the database-->
+            <input style="max-width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" disabled>
+            <!-- Bring the company name with the customer number provided by user-->
+        </div>
+        <div>
+            <table class="table" style="table-layout: fixed; width: 100%">
+                <thead class="table-light text-center">
+                    <tr>
+                        <td style="width: 3%">Line</td>
+                        <td style="width: 7%">Item</td>
+                        <td style="width: 36%">Description</td>
+                        <td style="width: 5%">Q</td>
+                        <td style="width: 7%">List Price</td>
+                        <td style="width: 5%">Discount</td>
+                        <td style="width: 7%">Net Price</td>
+                        <td style="width: 10%">Total</td>
+                        <td style="width: 10%">Lead Time</td>
+                        <td style="width: 10%">Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input style="width: 100%;" type="text"></td>
+                        <td><input style="width: 95%;" type="text"></td>
+                        <td><input style="width: 100%;" type="text" disabled></td>
+                        <td><input style="width: 95%;" type="text"></td>
+                        <td><input style="width: 95%;" type="text"></td>
+                        <td><input style="width: 95%;" type="text"></td>
+                        <td><input style="width: 95%;" type="text" disabled></td>
+                        <td><input style="width: 95%;" type="text" disabled></td>
+                        <td><input style="width: 95%;" type="text"></td>
+                        <td><input style="width: 95%;" type="text" disabled></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+            <label for="total_net_value">Total Net Value</label>
+            <input type="text" id="total_net_value" disabled>
+            <label for="total_tax">Total Tax</label>
+            <input type="text" id="total_tax" disabled>
+            <label for="total_tax_included">Total Tax Included</label>
+            <input type="text" id="total_tax_included" disabled>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin: 10px;">
+            <button class="btn btn-danger" type="submit">Create</button>
+        </div>
+    </form>
+    <form method="get" action="/get_quotes_list" style="padding: 3px">
+        <button class="btn btn-warning" type="submit">Back to Quotes</button>
+    </form>
+    <form method="get" action="/" style="padding: 3px">
+        <button class="btn btn-secondary" type="submit">Home</button>
+    </form>
+{% endblock %}

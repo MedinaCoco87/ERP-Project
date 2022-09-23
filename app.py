@@ -324,35 +324,38 @@ def get_quote_details():
 
 
 # Pending implementation in frontend
-@app.route ("/create_quote", methods = ["POST"])
+@app.route ("/create_quote", methods = ["GET", "POST"])
 def create_quote():
-    # Get the full json data
-    full_quote = request.get_json()
-    # Separate header from body
-    quote_header = full_quote["quote_header"]
-    quote_body = full_quote["quote_body"]
-    # Update first headers table to generate the quote number
-    db.execute ("INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)", quote_header["customer_id"], quote_header["created_by"])
-    # Get the quote number to use it in quote body
-    last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
-    quote_number = last_header[0]["quote_num"]
-    # Loop through all lines of quote body and insert into quote body table
-    for i in range(len(quote_body)):
-        line_net_total = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"]) *  quote_body[i]["quantity"]
-        db.execute(
-            "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-            quote_number, quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], 
-            quote_body[i]["list_price"], quote_body[i]["discounts"], line_net_total, quote_body[i]["lead_time"]
+    if request.method == "POST":
+        # Get the full json data
+        full_quote = request.get_json()
+        # Separate header from body
+        quote_header = full_quote["quote_header"]
+        quote_body = full_quote["quote_body"]
+        # Update first headers table to generate the quote number
+        db.execute ("INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)", quote_header["customer_id"], quote_header["created_by"])
+        # Get the quote number to use it in quote body
+        last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
+        quote_number = last_header[0]["quote_num"]
+        # Loop through all lines of quote body and insert into quote body table
+        for i in range(len(quote_body)):
+            line_net_total = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"]) *  quote_body[i]["quantity"]
+            db.execute(
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                quote_number, quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], 
+                quote_body[i]["list_price"], quote_body[i]["discounts"], line_net_total, quote_body[i]["lead_time"]
+            )
+        # Get the full total from body to update headers table
+        full_net_total = db.execute(
+            "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?", quote_number,
         )
-    # Get the full total from body to update headers table
-    full_net_total = db.execute(
-        "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?", quote_number,
-    )
-    db.execute(
-        "UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
-        full_net_total[0]["SUM(line_net_total)"], quote_number
-    )
-    return jsonify({"message": "quote created"})
+        db.execute(
+            "UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
+            full_net_total[0]["SUM(line_net_total)"], quote_number
+        )
+        return jsonify({"message": "quote created"})
+    
+    return render_template("new_quote.html")
 
 
 # Pending implementation in frontend
