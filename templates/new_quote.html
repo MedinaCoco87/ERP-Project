@@ -21,36 +21,41 @@
             <!-- Bring the company name with the customer number provided by user-->
         </div>
         <div>
-            <table class="table" style="table-layout: fixed; width: 100%">
-                <thead class="table-light text-center">
-                    <tr>
+            <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
+                <thead class="table-light text-center" style="width: 100%">
+                    <tr style="width: 100%">
                         <td style="width: 3%">Line</td>
                         <td style="width: 7%">Item</td>
                         <td style="width: 36%">Description</td>
                         <td style="width: 5%">Q</td>
                         <td style="width: 7%">List Price</td>
-                        <td style="width: 5%">Discount</td>
+                        <td style="width: 6%">Discount</td>
                         <td style="width: 7%">Net Price</td>
-                        <td style="width: 10%">Total</td>
-                        <td style="width: 10%">Lead Time</td>
-                        <td style="width: 10%">Status</td>
+                        <td style="width: 9%">Total</td>
+                        <td style="width: 7%">Lead Time</td>
+                        <td style="width: 7%">Status</td>
+                        <td style="min-width: 6%"></td>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><input style="width: 100%;" type="text"></td>
-                        <td><input style="width: 95%;" type="text"></td>
-                        <td><input style="width: 100%;" type="text" disabled></td>
-                        <td><input style="width: 95%;" type="text"></td>
-                        <td><input style="width: 95%;" type="text"></td>
-                        <td><input style="width: 95%;" type="text"></td>
-                        <td><input style="width: 95%;" type="text" disabled></td>
-                        <td><input style="width: 95%;" type="text" disabled></td>
-                        <td id="last_element"><input style="width: 95%;" type="text" value="Esto"></td>
-                        <td><input style="width: 95%;" type="text" disabled></td>
+                <tbody id="quote_lines">
+                    <tr id="line_01">
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
+                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div>
+            <button type="button" onclick="newLine()" class="btn btn-success btn-sm">New Line</button>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
             <label for="total_net_value">Total Net Value</label>
