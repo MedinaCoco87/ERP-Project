@@ -36,6 +36,11 @@ function newLine(){
     document.querySelector('#quote_lines').appendChild(newLine);
 };
 
+function removeLine(lineId){
+    let lineToRemove = document.getElementById(lineId);
+    lineToRemove.remove();
+}
+
 
 
 
