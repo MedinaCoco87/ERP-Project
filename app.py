@@ -205,7 +205,7 @@ def update_customer(customer_id):
 def get_customer_by_id(customer_id):
     customer = db.execute("SELECT * FROM customers WHERE id = ?", customer_id)
     if not customer:
-        return jsonify({"message": "customer not found"}), 400
+        return jsonify([{"message": "customer not found"}]), 400
     return jsonify(customer), 200
     
 

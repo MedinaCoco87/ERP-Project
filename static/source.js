@@ -49,6 +49,21 @@ function removeLine(lineId){
     }
 };
 
+// Check customer_id and bring company name
+let customerId = document.getElementById('customer_id')
+customerId.addEventListener('input', async function (){
+    let response = await fetch('/customers/' + customerId.value);
+    let customer = await response.json();
+    
+    if("company_name" in customer[0]){
+        let companyName = customer[0]["company_name"];
+        document.getElementById('company_name').value = companyName;
+    }
+    else{
+        document.getElementById('company_name').value = "INVALID CUSTOMER"
+    }
+});
+
 
 
 
