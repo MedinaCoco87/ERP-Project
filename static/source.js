@@ -1,9 +1,9 @@
 
 // Set the current date as the max allowed date in quotes.
 let today = new Date()
-var dd = String(today.getDate()).padStart(2, '0');
-var mm = String(today.getMonth() + 1).padStart(2, '0');
-var yyyy = today.getFullYear();
+let dd = String(today.getDate()).padStart(2, '0');
+let mm = String(today.getMonth() + 1).padStart(2, '0');
+let yyyy = today.getFullYear();
 
 today = yyyy + '-' + mm + '-' + dd;
 console.log(today);
@@ -12,29 +12,44 @@ quoteDate = document.querySelector('#quote_date');
 quoteDate.setAttribute('max', today);
 quoteDate.setAttribute('value', today);
 
+
 function newLine(){
     // Get the last quote_line
-    let lastLine = document.getElementById('quote_lines').lastElementChild;
+    let lastQuoteLine = document.getElementById('quote_lines').lastElementChild;
     // Get the last quote_line id and store it in a variable
-    let lastId = lastLine.getAttribute('id');
+    let lastQuoteLineId = lastQuoteLine.getAttribute('id');
     // Get the id_index by accessing the last 2 characters of the id
-    let lastIndex = lastId.substring(5, 7);
+    let lastIdIndex = lastQuoteLineId.substring(5, 7);
     // Increment the id_index by 1 for the new row
-    let newIndex = parseInt(lastIndex, 10) + 1;
-    let newIdIndex = newIndex.toString().padStart(2, "0");
-    // Form the new id with the new index
-    let newId = "line_" + newIdIndex
+    let newIdIndex = parseInt(lastIdIndex, 10) + 1;
+    newIdIndex = newIdIndex.toString().padStart(2, "0");
+    // Form the new ids with some meaningful string + the new index
+    let newQuoteLineId = "line_" + newIdIndex
+    let newItemElementId = "item_" + newIdIndex
     
     // Clone the row and store it in a variable
-    let newLine = lastLine.cloneNode(true);
-    // Set the new id for the new row before updating the DOM
-    newLine.id = newId;
-    // Get the last element of the new line
-    let newLineLastElement = newLine.lastElementChild;
+    let newQuoteLine = lastQuoteLine.cloneNode(true);
+    // Set the a id for the new line before updating the DOM
+    newQuoteLine.id = newQuoteLineId;
+    // Get the last element child of the new line
+    let newLineLastElement = newQuoteLine.lastElementChild;
     // Change the value of the "onclick" attribute to pass the current id to the function 
-    onclickValue = "removeLine('" + newId + "')"
+    onclickValue = "removeLine('" + newQuoteLineId + "')"
     newLineLastElement.setAttribute("onclick", onclickValue)
-    document.querySelector('#quote_lines').appendChild(newLine);
+    // Get the "item" element of the new_line
+    let newQuoteLineFirstChild = newQuoteLine.firstElementChild;
+    let newItemElement = newQuoteLineFirstChild.nextElementSibling;
+    // Set a new Id for the new ItemElement
+    newItemElement.id = newItemElementId;
+    // Get the input element inside the item element
+    let inputOfItemElement = newItemElement.firstElementChild;
+    // Change the value of the oninput attribute to include the current itemElementId
+    onInputValue = "getItem('" + newItemElementId + "')";
+    inputOfItemElement.setAttribute('oninput', onInputValue);
+
+    // Append the new line to the DOM
+    document.querySelector('#quote_lines').appendChild(newQuoteLine);
+
 };
 
 function removeLine(lineId){
@@ -54,7 +69,7 @@ let customerId = document.getElementById('customer_id')
 customerId.addEventListener('input', async function (){
     let response = await fetch('/customers/' + customerId.value);
     let customer = await response.json();
-    
+    // If provided an invalid customer_id will be informed
     if("company_name" in customer[0]){
         let companyName = customer[0]["company_name"];
         document.getElementById('company_name').value = companyName;
@@ -63,6 +78,25 @@ customerId.addEventListener('input', async function (){
         document.getElementById('company_name').value = "INVALID CUSTOMER"
     }
 });
+
+// Function to get item descriptions in forms
+async function getItem(itemId){
+   let itemElement = document.getElementById(itemId).firstElementChild;
+   let response = await fetch('/items/' + itemElement.value);
+   let item = await response.json();
+   // Check if a valid item_id is provided
+   if("description" in item[0]){
+    let itemDescription = item[0]["description"];
+    let descriptionField = document.getElementById(itemId).nextElementSibling;
+    let inputDescriptionField = descriptionField.firstElementChild;
+    inputDescriptionField.value = itemDescription;
+   }
+   else{
+    let descriptionField = document.getElementById(itemId).nextElementSibling;
+    let inputDescriptionField = descriptionField.firstElementChild;
+    inputDescriptionField.value = "INVALID ITEM";
+   }
+};
 
 
 

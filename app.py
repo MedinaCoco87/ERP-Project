@@ -200,7 +200,7 @@ def update_customer(customer_id):
     return jsonify({"message": "user updated"}), 200
 
 
-# Pending vinculation with frontend
+# Partial vinculation with frontend
 @app.route("/customers/<customer_id>", methods = ["GET"])
 def get_customer_by_id(customer_id):
     customer = db.execute("SELECT * FROM customers WHERE id = ?", customer_id)
@@ -283,12 +283,11 @@ def create_item():
 
 
 
-# Pending vinculation to frontend
 @app.route ("/items/<item_id>", methods = ["GET"])
 def get_item_by_id(item_id):
     item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
     if not item:
-        return jsonify({"messagge": "item not found"}), 400
+        return jsonify([{"messagge": "item not found"}]), 400
     return jsonify(item), 200
 
 
