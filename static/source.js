@@ -1,5 +1,5 @@
 
-// Set the current date as a 'max' allowed date in quotes.
+// Set the current date as the max allowed date in quotes.
 let today = new Date()
 var dd = String(today.getDate()).padStart(2, '0');
 var mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -10,6 +10,7 @@ console.log(today);
 
 quoteDate = document.querySelector('#quote_date');
 quoteDate.setAttribute('max', today);
+quoteDate.setAttribute('value', today);
 
 function newLine(){
     // Get the last quote_line
@@ -37,9 +38,16 @@ function newLine(){
 };
 
 function removeLine(lineId){
-    let lineToRemove = document.getElementById(lineId);
-    lineToRemove.remove();
-}
+    // Check the line to remove is not the last one standing
+    if(document.getElementById(lineId)!=document.getElementById('quote_lines').firstElementChild || 
+    document.getElementById(lineId)!=document.getElementById('quote_lines').lastElementChild) {
+        let lineToRemove = document.getElementById(lineId);
+        lineToRemove.remove();
+    }
+    else{
+        alert("You can't remove all the lines");
+    }
+};
 
 
 
