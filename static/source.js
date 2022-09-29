@@ -144,5 +144,46 @@ function calculateTotal(lineId){
     // Check net_price is a number (int or float) different than 0.
         // Calculate the new total
     // Else do nothing
-}
+    if (isNaN(netPrice) || netPrice <= 0){
+        return;
+    };
+    // Calculate the total rounding to only 2 decimals
+    let total = Math.round(((quantity * netPrice) + Number.EPSILON) * 100) / 100;
+    // Get the total input element to update value
+    let totalElement = netPriceElement.nextElementSibling;
+    let inputOfTotal = totalElement.firstElementChild;
+    inputOfTotal.setAttribute('value', total);
+};
+
+
+function calculateNetPriceAndTotal(lineId){
+    // Get the row element
+    let rowElement = document.getElementById(lineId);
+    // Traverse to quantity_element and get the current value
+    let lineElement = rowElement.firstElementChild;
+    let itemElement = lineElement.nextElementSibling;
+    let descriptionElement = itemElement.nextElementSibling;
+    let quantityElement = descriptionElement.nextElementSibling;
+    let quantityInput = quantityElement.firstElementChild;
+    let quantity = quantityInput.value;
+    // Traverse to list_price and get the current value
+    let listPriceElement = quantityElement.nextElementSibling;
+    let inputOfListPrice = listPriceElement.firstElementChild;
+    let listPrice = inputOfListPrice.value
+    // Traverse to discount and get the current value
+    let discountElement = listPriceElement.nextElementSibling;
+    let inputOfDiscount = discountElement.firstElementChild;
+    let discount = inputOfDiscount.value;
+    // Calculate new net_price
+    let netPrice = Math.round(((listPrice * (1 - discount)) + Number.EPSILON) * 100) / 100;
+    // Get the net_price element and update the value
+    let netPriceElement = discountElement.nextElementSibling;
+    let inputOfNetPrice = netPriceElement.firstElementChild;
+    inputOfNetPrice.setAttribute('value', netPrice);
+    // Get the total element and update the value
+    let totalElement = netPriceElement.nextElementSibling;
+    let inputOfTotal = totalElement.firstElementChild;
+    let total = Math.round(((quantity * netPrice) + Number.EPSILON) * 100) / 100;
+    inputOfTotal.setAttribute('value', total);
+};
 
