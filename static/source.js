@@ -78,6 +78,25 @@ function removeLine(lineId){
     document.getElementById(lineId)!=document.getElementById('quote_lines').lastElementChild) {
         let lineToRemove = document.getElementById(lineId);
         lineToRemove.remove();
+
+        // This section will update grand totals
+        let totals = document.getElementsByClassName('total');
+        // Get the total net value
+        let totalNetValue = 0;
+        for(let i = 0; i < totals.length; i++){
+            totalNetValue += parseFloat(totals[i].value);
+        }
+        // Get the total tax amount
+        let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
+        // Get the total tax included
+        let totalTaxIncluded = totalNetValue + taxAmount;
+        // Update all the values in the respective elements
+        let totalNetValueElement = document.getElementById('total_net_value');
+        totalNetValueElement.setAttribute('value', totalNetValue);
+        let TaxAmountElement = document.getElementById('tax_amount');
+        TaxAmountElement.setAttribute('value', taxAmount);
+        let totalTaxIncludedElement = document.getElementById('total_tax_included');
+        totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
     }
     else{
         alert("You can't remove all the lines");
@@ -125,7 +144,6 @@ async function getItem(itemId){
 
 function calculateTotal(lineId){
     // Get the row element
-    console.log(lineId);
     rowElement = document.getElementById(lineId);
     // Traverse to the quantity element and get the typed value
     let lineElement = rowElement.firstElementChild;
@@ -153,6 +171,25 @@ function calculateTotal(lineId){
     let totalElement = netPriceElement.nextElementSibling;
     let inputOfTotal = totalElement.firstElementChild;
     inputOfTotal.setAttribute('value', total);
+
+    // This last section will update grand totals
+    let totals = document.getElementsByClassName('total');
+    // Get the total net value
+    let totalNetValue = 0;
+    for(let i = 0; i < totals.length; i++){
+        totalNetValue += parseFloat(totals[i].value);
+    }
+    // Get the total tax amount
+    let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
+    // Get the total tax included
+    let totalTaxIncluded = totalNetValue + taxAmount;
+    // Update all the values in the respective elements
+    let totalNetValueElement = document.getElementById('total_net_value');
+    totalNetValueElement.setAttribute('value', totalNetValue);
+    let TaxAmountElement = document.getElementById('tax_amount');
+    TaxAmountElement.setAttribute('value', taxAmount);
+    let totalTaxIncludedElement = document.getElementById('total_tax_included');
+    totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
 };
 
 
@@ -185,5 +222,25 @@ function calculateNetPriceAndTotal(lineId){
     let inputOfTotal = totalElement.firstElementChild;
     let total = Math.round(((quantity * netPrice) + Number.EPSILON) * 100) / 100;
     inputOfTotal.setAttribute('value', total);
+
+
+    // This last section will update grand totals
+    let totals = document.getElementsByClassName('total');
+    // Get the total net value
+    let totalNetValue = 0;
+    for(let i = 0; i < totals.length; i++){
+        totalNetValue += parseFloat(totals[i].value);
+    }
+    // Get the total tax amount
+    let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
+    // Get the total tax included
+    let totalTaxIncluded = totalNetValue + taxAmount;
+    // Update all the values in the respective elements
+    let totalNetValueElement = document.getElementById('total_net_value');
+    totalNetValueElement.setAttribute('value', totalNetValue);
+    let TaxAmountElement = document.getElementById('tax_amount');
+    TaxAmountElement.setAttribute('value', taxAmount);
+    let totalTaxIncludedElement = document.getElementById('total_tax_included');
+    totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
 };
 
