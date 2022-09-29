@@ -22,7 +22,7 @@
         </div>
         <div>
             <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
-                <thead class="table-light text-center" style="width: 100%">
+                <thead class="table-primary text-center" style="width: 100%">
                     <tr style="width: 100%">
                         <td style="width: 3%">Line</td>
                         <td style="width: 7%">Item</td>
@@ -39,16 +39,16 @@
                 </thead>
                 <tbody id="quote_lines">
                     <tr id="line_01">
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
-                        <td id="item_01" style="padding: 0.5px; margin: 1px"><input oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input style="width: 100%;" type="text" disabled></td>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text"></td>
+                        <td id="item_01" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="CalculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="CalculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="PENDING" disabled></td>
                         <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                     </tr>
                 </tbody>

@@ -23,13 +23,13 @@ function newLine(){
     // Increment the id_index by 1 for the new row
     let newIdIndex = parseInt(lastIdIndex, 10) + 1;
     newIdIndex = newIdIndex.toString().padStart(2, "0");
-    // Form the new ids with some meaningful string + the new index
+    // Form the new ids strings with element name + the new index
     let newQuoteLineId = "line_" + newIdIndex
-    let newItemElementId = "item_" + newIdIndex
+    let newLineItemElementId = "item_" + newIdIndex
     
     // Clone the row and store it in a variable
     let newQuoteLine = lastQuoteLine.cloneNode(true);
-    // Set the a id for the new line before updating the DOM
+    // Set the id for the new line before updating the DOM
     newQuoteLine.id = newQuoteLineId;
     // Get the last element child of the new line
     let newLineLastElement = newQuoteLine.lastElementChild;
@@ -37,20 +37,40 @@ function newLine(){
     onclickValue = "removeLine('" + newQuoteLineId + "')"
     newLineLastElement.setAttribute("onclick", onclickValue)
     // Get the "item" element of the new_line
-    let newQuoteLineFirstChild = newQuoteLine.firstElementChild;
-    let newItemElement = newQuoteLineFirstChild.nextElementSibling;
+    let newLineFirstElement = newQuoteLine.firstElementChild;
+    let newLineItemElement = newLineFirstElement.nextElementSibling;
     // Set a new Id for the new ItemElement
-    newItemElement.id = newItemElementId;
+    newLineItemElement.id = newLineItemElementId;
     // Get the input element inside the item element
-    let inputOfItemElement = newItemElement.firstElementChild;
+    let inputOfItemElement = newLineItemElement.firstElementChild;
     // Change the value of the oninput attribute to include the current itemElementId
-    onInputValue = "getItem('" + newItemElementId + "')";
+    onInputValue = "getItem('" + newLineItemElementId + "')";
     inputOfItemElement.setAttribute('oninput', onInputValue);
+    // Get the quantity element
+    let newDescriptionElement = newLineItemElement.nextElementSibling;
+    let newQuantityElement = newDescriptionElement.nextElementSibling;
+    // Get to the quantity child input and change the "onchange" attribute
+    let inputOfQuantityElement = newQuantityElement.firstElementChild;
+    quantityOnChangeValue = "calculateTotal('" + newQuoteLineId + "')";
+    inputOfQuantityElement.setAttribute('onchange', quantityOnChangeValue);
+    // Get the list_price element
+    let newListPriceElement = newQuantityElement.nextElementSibling;
+    // Get to the list_price child input element and change the "onchange" attribute
+    let inputOfListPriceElement = newListPriceElement.firstElementChild;
+    priceOnChangeValue = "calculateNetPriceAndTotal('" + newQuoteLineId + "')";
+    inputOfListPriceElement.setAttribute('onchange', priceOnChangeValue);
+    // Get the discount element
+    let newDiscountElement = newListPriceElement.nextElementSibling;
+    // Get the child input of the discount element and change its "onchage attribute"
+    let inputOfDiscountElement = newDiscountElement.firstElementChild;
+    inputOfDiscountElement.setAttribute('onchange', priceOnChangeValue);
+
 
     // Append the new line to the DOM
     document.querySelector('#quote_lines').appendChild(newQuoteLine);
-
 };
+
+
 
 function removeLine(lineId){
     // Check the line to remove is not the last one standing
@@ -63,6 +83,8 @@ function removeLine(lineId){
         alert("You can't remove all the lines");
     }
 };
+
+
 
 // Check customer_id and bring company name
 let customerId = document.getElementById('customer_id')
@@ -78,6 +100,8 @@ customerId.addEventListener('input', async function (){
         document.getElementById('company_name').value = "INVALID CUSTOMER"
     }
 });
+
+
 
 // Function to get item descriptions in forms
 async function getItem(itemId){
@@ -99,5 +123,26 @@ async function getItem(itemId){
 };
 
 
+function calculateTotal(lineId){
+    // Get the row element
+    console.log(lineId);
+    rowElement = document.getElementById(lineId);
+    // Traverse to the quantity element and get the typed value
+    let lineElement = rowElement.firstElementChild;
+    let itemElement = lineElement.nextElementSibling;
+    let descriptionElement = itemElement.nextElementSibling;
+    let quantityElement = descriptionElement.nextElementSibling;
+    let quantityInput = quantityElement.firstElementChild;
+    let quantity = quantityInput.value;
+    // Traverse to the net_price element and get the current value
+    let listPriceElement = quantityElement.nextElementSibling;
+    let discountElement = listPriceElement.nextElementSibling;
+    let netPriceElement = discountElement.nextElementSibling;
+    let netPriceInput = netPriceElement.firstElementChild;
+    let netPrice = netPriceInput.value;
 
+    // Check net_price is a number (int or float) different than 0.
+        // Calculate the new total
+    // Else do nothing
+}
 
