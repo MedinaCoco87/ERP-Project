@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New Quote
+{% endblock %}
+
+{% block body %}
+
+    <div id="title" class="h2 text-center">New Quote</div>
+    <form action="/create_quote" method="post">
+        <div>
+            <input id="quote_date" type="date" Style="max-width: 110px;">
+        </div>
+        <div>
+            <input type="text" name="quote_id" id="quote_id" placeholder="Quote No." disabled style="max-width: 110px;">
+        </div> <!-- Bring the quote number once is created-->
+        <div class="flex-container">
+            <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="max-width: 110px;">
+            <!-- Chech the user provides a valid customer number with the database-->
+            <input style="max-width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" disabled>
+            <!-- Bring the company name with the customer number provided by user-->
+        </div>
+        <!-- This one below is the div of the table-->
+        <div>
+            <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
+                <thead class="table-primary text-center" style="width: 100%">
+                    <tr style="width: 100%">
+                        <td style="width: 3%">Line</td>
+                        <td style="width: 7%">Item</td>
+                        <td style="width: 36%">Description</td>
+                        <td style="width: 5%">Q</td>
+                        <td style="width: 7%">List Price</td>
+                        <td style="width: 6%">Discount</td>
+                        <td style="width: 7%">Net Price</td>
+                        <td style="width: 9%">Total</td>
+                        <td style="width: 7%">Lead Time</td>
+                        <td style="width: 7%">Status</td>
+                        <td style="min-width: 6%"></td>
+                    </tr>
+                    <tr id="template_row" hidden>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text"></td>
+                        <td id="item_" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="lead_time[]" class="lead_time" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="status[]" class="status" style="width: 100%;" type="text" value="PENDING" disabled></td>
+                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                    </tr>
+                </thead>
+                <tbody id="quote_lines">
+                    <tr id="line_01">
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text"></td>
+                        <td id="item_01" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="lead_time[]" class="lead_time" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="status[]" input class="status" style="width: 100%;" type="text" value="PENDING" disabled></td>
+                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <button type="button" onclick="newLine()" class="btn btn-success btn-sm">New Line</button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+            <label for="total_net_value">Total Net Value</label>
+            <input type="text" id="total_net_value" disabled>
+            <label for="tax_amount">Tax Amount</label>
+            <input type="text" id="tax_amount" disabled>
+            <label for="total_tax_included">Total Tax Included</label>
+            <input type="text" id="total_tax_included" disabled>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin: 10px;">
+            <button class="btn btn-danger" type="submit">Create</button>
+        </div>
+    </form>
+    <form method="get" action="/get_quotes_list" style="padding: 3px">
+        <button class="btn btn-warning" type="submit">Back to Quotes</button>
+    </form>
+    <form method="get" action="/" style="padding: 3px">
+        <button class="btn btn-secondary" type="submit">Home</button>
+    </form>
+    <script src="static/source.js"></script>
+{% endblock %}
