@@ -325,6 +325,31 @@ def get_quote_details():
 # Pending implementation in frontend
 @app.route ("/create_quote", methods = ["GET", "POST"])
 def create_quote():
+
+    # lines = request.form.get("line")
+    # items = request.form.get("item")
+    # descriptions = request.form.get("description")
+    # quantities = request.form.get("q")
+    # list_prices = request.form.get("list_price")
+    # discounts = request.form.get("discount")
+    # net_prices = request.form.get("net_price")
+    # totals = request.form.get("total")
+    # lead_times = request.form.get("lead_time")
+    # quote_body = []
+    # quote_row = {}
+    # for i in range(len(lines)):
+        # quote_row["line"] = lines[i]
+        # quote_row["item"] = items[i]
+        # quote_row["description"] = descriptions[i]
+        # quote_row["quantity"] = quantities[i]
+        # quote_row["list_price"] = list_prices[i]
+        # quote_row["discount"] = discounts[i]
+        # quote_row["net_price"] = net_prices[i]
+        # quote_row["total"] = totals[i]
+        # quote_row["status"] = status[i]
+
+
+
     if request.method == "POST":
         # Get the full json data
         full_quote = request.get_json()
