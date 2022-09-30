@@ -7,7 +7,7 @@
 {% block body %}
 
     <div id="title" class="h2 text-center">New Quote</div>
-    <form action="/create_quote" method="post">
+    <form action="/create_quote" method="post" onsubmit="gatherData()">
         <div>
             <input id="quote_date" type="date" Style="max-width: 110px;">
         </div>
@@ -78,6 +78,9 @@
             <input type="text" id="tax_amount" disabled>
             <label for="total_tax_included">Total Tax Included</label>
             <input type="text" id="total_tax_included" disabled>
+        </div>
+        <div>
+            <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 10px;">
             <button class="btn btn-danger" type="submit">Create</button>

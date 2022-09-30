@@ -1,7 +1,7 @@
 import os
 
+import json
 from cs50 import SQL
-from flask import Flask, jsonify, redirect, request
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -325,59 +325,57 @@ def get_quote_details():
 # Pending implementation in frontend
 @app.route ("/create_quote", methods = ["GET", "POST"])
 def create_quote():
-
-    # lines = request.form.get("line")
-    # items = request.form.get("item")
-    # descriptions = request.form.get("description")
-    # quantities = request.form.get("q")
-    # list_prices = request.form.get("list_price")
-    # discounts = request.form.get("discount")
-    # net_prices = request.form.get("net_price")
-    # totals = request.form.get("total")
-    # lead_times = request.form.get("lead_time")
-    # quote_body = []
-    # quote_row = {}
-    # for i in range(len(lines)):
-        # quote_row["line"] = lines[i]
-        # quote_row["item"] = items[i]
-        # quote_row["description"] = descriptions[i]
-        # quote_row["quantity"] = quantities[i]
-        # quote_row["list_price"] = list_prices[i]
-        # quote_row["discount"] = discounts[i]
-        # quote_row["net_price"] = net_prices[i]
-        # quote_row["total"] = totals[i]
-        # quote_row["status"] = status[i]
-
-
-
     if request.method == "POST":
+        # Get all the lists from the frontend form
+        data = request.form.get("data")
+        data_dict = json.loads(data)
+        for i in range(len(data_dict)):
+            print(data_dict[i]["item"])
+        # Get the list of current valid items to compare with input
+        items_list = db.execute("SELECT * FROM items")
+        items = []
+        #for i in range(len(items_list)):
+            #items.append(items_list[i]["id"])
+        # Validate the inputs of all the important fields
+        #for i in range(len(lines)):
+            #if not items[i] or items[i] not in items or not quantities[i] or quantities[i] <= 0 or not list_prices[i] or list_prices[i] <= 0:
+                #message = "invalid input in line" + (i + 1)
+                #return render_template("error.html", message=message)
+        return render_template("quotes_list.html")
+    
+
+    
+
+
+
+    
         # Get the full json data
-        full_quote = request.get_json()
+        #full_quote = request.get_json()
         # Separate header from body
-        quote_header = full_quote["quote_header"]
-        quote_body = full_quote["quote_body"]
+        #quote_header = full_quote["quote_header"]
+        #quote_body = full_quote["quote_body"]
         # Update first headers table to generate the quote number
-        db.execute ("INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)", quote_header["customer_id"], quote_header["created_by"])
+        #db.execute ("INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)", quote_header["customer_id"], quote_header["created_by"])
         # Get the quote number to use it in quote body
-        last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
-        quote_number = last_header[0]["quote_num"]
+        #last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
+        #quote_number = last_header[0]["quote_num"]
         # Loop through all lines of quote body and insert into quote body table
-        for i in range(len(quote_body)):
-            line_net_total = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"]) *  quote_body[i]["quantity"]
-            db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                quote_number, quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], 
-                quote_body[i]["list_price"], quote_body[i]["discounts"], line_net_total, quote_body[i]["lead_time"]
-            )
+        #for i in range(len(quote_body)):
+            #line_net_total = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"]) *  quote_body[i]["quantity"]
+            #db.execute(
+                #"INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                #quote_number, quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], 
+                #quote_body[i]["list_price"], quote_body[i]["discounts"], line_net_total, quote_body[i]["lead_time"]
+            #)
         # Get the full total from body to update headers table
-        full_net_total = db.execute(
-            "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?", quote_number,
-        )
-        db.execute(
-            "UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
-            full_net_total[0]["SUM(line_net_total)"], quote_number
-        )
-        return jsonify({"message": "quote created"})
+        #full_net_total = db.execute(
+            #"SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?", quote_number,
+        #)
+        #db.execute(
+            #"UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
+            #full_net_total[0]["SUM(line_net_total)"], quote_number
+        #)
+        #return jsonify({"message": "quote created"})
     
     return render_template("new_quote.html")
 
