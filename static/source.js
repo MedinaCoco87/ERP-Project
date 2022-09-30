@@ -27,9 +27,14 @@ function newLine(){
     let newQuoteLineId = "line_" + newIdIndex
     let newLineItemElementId = "item_" + newIdIndex
     
+    // Get the template row
+    let templateRow = document.getElementById('template_row');
     // Clone the row and store it in a variable
-    let newQuoteLine = lastQuoteLine.cloneNode(true);
-    // Set the id for the new line before updating the DOM
+    let newQuoteLine = templateRow.cloneNode(true);
+    // Remove the hidden attribute to the new row
+    newQuoteLine.removeAttribute('hidden');
+
+    // Set the id for the new line <tr>
     newQuoteLine.id = newQuoteLineId;
     // Get the last element child of the new line
     let newLineLastElement = newQuoteLine.lastElementChild;
@@ -122,7 +127,6 @@ customerId.addEventListener('input', async function (){
 
 
 
-// Function to get item descriptions in forms
 async function getItem(itemId){
    let itemElement = document.getElementById(itemId).firstElementChild;
    let response = await fetch('/items/' + itemElement.value);
@@ -159,9 +163,7 @@ function calculateTotal(lineId){
     let netPriceInput = netPriceElement.firstElementChild;
     let netPrice = netPriceInput.value;
 
-    // Check net_price is a number (int or float) different than 0.
-        // Calculate the new total
-    // Else do nothing
+    // Check net_price is a number (int or float) > 0.
     if (isNaN(netPrice) || netPrice <= 0){
         return;
     };
