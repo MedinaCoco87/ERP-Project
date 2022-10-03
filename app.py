@@ -334,13 +334,21 @@ def create_quote():
         # Get the list of current valid items to compare with input
         items_list = db.execute("SELECT * FROM items")
         items = []
-        #for i in range(len(items_list)):
-            #items.append(items_list[i]["id"])
-        # Validate the inputs of all the important fields
-        #for i in range(len(lines)):
-            #if not items[i] or items[i] not in items or not quantities[i] or quantities[i] <= 0 or not list_prices[i] or list_prices[i] <= 0:
-                #message = "invalid input in line" + (i + 1)
-                #return render_template("error.html", message=message)
+        # Make a new list with only the items_id
+        for i in range(len(items_list)):
+            items.append(items_list[i]["id"])
+        print(items)
+        # Validate the user provides a valid item id:
+        for i in range((len(data_dict))-1):
+            if not data_dict[i+1]["item"] or int(data_dict[i+1]["item"]) not in items:
+                message = "Invalid item in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not data_dict[i+1]["quantity"] or int(data_dict[i+1]["quantity"]) <= 0:
+                message = "Invalid quantity in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not data_dict[i+1]["list_price"] or float(data_dict[i+1]["list_price"]) <= 0:
+                message = "Invalid price in line " + str(i+1)
+                return render_template("error.html", message=message)
         return render_template("quotes_list.html")
     
 

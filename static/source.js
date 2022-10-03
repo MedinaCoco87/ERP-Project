@@ -236,7 +236,7 @@ function calculateNetPriceAndTotal(lineId){
     // Get the total tax amount
     let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
     // Get the total tax included
-    let totalTaxIncluded = totalNetValue + taxAmount;
+    let totalTaxIncluded = Math.round(((totalNetValue + taxAmount) + Number.EPSILON) * 100) / 100;
     // Update all the values in the respective elements
     let totalNetValueElement = document.getElementById('total_net_value');
     totalNetValueElement.setAttribute('value', totalNetValue);
