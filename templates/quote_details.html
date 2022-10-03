@@ -4,18 +4,24 @@
     Quote Details
 {% endblock %}
 
+
+    
 {% block body %}
 <div id="title" class="h2 text-center">Quote Details</div>
 <form action="/edit_quote" method="get">
     <div>
-        <input type="date" Style="max-width: 110px;" value="{{ header[0]['date'] }}" disabled>
+        <label for="creation_date">Creation Date:</label>
+        <input id="creation_date" type="date" Style="max-width: 110px;" value="{{ header[0]['date'] }}" disabled>
     </div>
     <div>
+        <label for="quote_id">Quote No:</label>
         <input type="text" name="quote_id" id="quote_id" placeholder="Quote No." style="max-width: 110px;" value="{{ header[0]['quote_num'] }}" disabled>
     </div> <!-- Bring the quote number once is created-->
-    <div class="flex-container">
+    <div class="flex-container" style="margin-bottom: 5px;">
+        <label for="customer_id">Customer ID:</label>
         <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="max-width: 110px;" value="{{ header[0]['customer_id'] }}" disabled>
-        <input style="max-width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="Add some Javascript" disabled>
+        <label for="company_name">Company Name:</label>
+        <input style="max-width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" disabled>
     </div>
     <!-- This one below is the div of the table-->
     <div>
@@ -38,8 +44,8 @@
                 {% for body in bodies %}
                     <tr>
                         <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}" disabled></td>
-                        <td id="item_01" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" style="width: 100%;" type="text" value="{{ body['item_id'] }}" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" value="Add some javascript" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" style="width: 100%;" type="text" value="{{ body['item_id'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" value="{{ body['item_desc'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" style="width: 100%;" type="text" value="{{ body['quantity'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" style="width: 100%;" type="text" value="{{ body['list_price'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" style="width: 100%;" type="text" value="{{ body['discounts'] }}" disabled></td>
@@ -77,5 +83,7 @@
 <form method="get" action="/" style="padding: 3px">
     <button class="btn btn-secondary" type="submit">Home</button>
 </form>
+
 <script src="static/source.js"></script>
+
 {% endblock %}

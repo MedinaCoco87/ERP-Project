@@ -313,7 +313,8 @@ def get_quote_details():
     quote_id = request.args.get("quote_num")
     header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
     bodies = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_id)
-    return render_template("quote_details.html", header=header, bodies=bodies)
+    length = len(bodies)
+    return render_template("quote_details.html", length=length, header=header, bodies=bodies)
 
 
 # Pending implementation in frontend
@@ -350,8 +351,8 @@ def create_quote():
         
         # Create quote_header table to generate the quote number
         db.execute(
-            "INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)",
-            request.form.get("customer_id"), session["username"]
+            "INSERT INTO quote_header (customer_id, company_name, created_by) VALUES (?, ?, ?)",
+            request.form.get("customer_id"), request.form.get("company_name"), session["username"]
         )
         # Get the quote number to use it in quote body
         last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
@@ -360,8 +361,8 @@ def create_quote():
         for i in range((len(quote_lines))-1):
             line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
             db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), int(quote_lines[i+1]["quantity"]), 
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
                 float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
             )
         # Get the full total from body to update headers table
