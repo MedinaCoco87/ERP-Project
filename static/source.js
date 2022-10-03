@@ -236,7 +236,7 @@ function calculateNetPriceAndTotal(lineId){
     // Get the total tax amount
     let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
     // Get the total tax included
-    let totalTaxIncluded = totalNetValue + taxAmount;
+    let totalTaxIncluded = Math.round(((totalNetValue + taxAmount) + Number.EPSILON) * 100) / 100;
     // Update all the values in the respective elements
     let totalNetValueElement = document.getElementById('total_net_value');
     totalNetValueElement.setAttribute('value', totalNetValue);
@@ -244,5 +244,46 @@ function calculateNetPriceAndTotal(lineId){
     TaxAmountElement.setAttribute('value', taxAmount);
     let totalTaxIncludedElement = document.getElementById('total_tax_included');
     totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
+};
+
+
+function gatherData(){
+    lines = document.getElementsByClassName("line");
+    items = document.getElementsByClassName("item");
+    descriptions = document.getElementsByClassName("description");
+    quantities = document.getElementsByClassName("quantity");
+    listPrices = document.getElementsByClassName("list_price");
+    discounts = document.getElementsByClassName("discount");
+    netPrices = document.getElementsByClassName("net_price");
+    totals = document.getElementsByClassName("total");
+    leadTimes = document.getElementsByClassName("lead_time");
+    rowFullList = [];
+    for (let i = 0; i < lines.length; i++){
+        console.log(quantities[i].value);
+    }
+    for (let i = 0; i < lines.length; i++){
+    rowLine = {};
+    rowLine["line"] = lines[i].value;
+    rowLine["item"] = items[i].value;
+    rowLine["description"] = descriptions[i].value;
+    rowLine["quantity"] = quantities[i].value;
+    rowLine["list_price"] = listPrices[i].value;
+    rowLine["discount"] = discounts[i].value;
+    rowLine["net_price"] = netPrices[i].value;
+    rowLine["total"] = totals[i].value;
+    rowLine["lead_time"] = leadTimes[i].value;
+    rowFullList[i] = rowLine;
+    };
+    console.log(rowFullList);
+    // Get text area element
+    dataElement = document.getElementById('data');
+    data = "[";
+    for (let i = 0; i < rowFullList.length; i++){
+        myJson = JSON.stringify(rowFullList[i]);
+        data = data + myJson + ",";
+    };
+    data = data.substring(0, data.length - 1);
+    data = data + "]";
+    dataElement.innerHTML = data;
 };
 

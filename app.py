@@ -1,7 +1,7 @@
 import os
 
+import json
 from cs50 import SQL
-from flask import Flask, jsonify, redirect, request
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -304,15 +304,9 @@ def get_items_by_category(category_id):
 
 @app.route("/get_quotes_list", methods = ["GET"])
 def get_all_quotes():
-    quotes = db.execute("SELECT * FROM quote_header")
+    quotes = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC")
     return render_template("quotes_list.html", quotes=quotes)
-    # Get me an empty list to store all the quotes as dictionaries
-    #quotes = []
-    # For each quote_num in header, get me all the body rows with that same quote_num
-    #for i in range(len(quote_headers)):
-        #quote_body = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_headers[i]["quote_num"])
-        #quotes.append({"1_quote_header": quote_headers[i], "2_quote_body": quote_body})
-    #return jsonify(quotes)
+
 
 @app.route("/quote_details", methods=["GET"])
 def get_quote_details():
@@ -325,49 +319,50 @@ def get_quote_details():
 # Pending implementation in frontend
 @app.route ("/create_quote", methods = ["GET", "POST"])
 def create_quote():
-
-    # lines = request.form.get("line")
-    # items = request.form.get("item")
-    # descriptions = request.form.get("description")
-    # quantities = request.form.get("q")
-    # list_prices = request.form.get("list_price")
-    # discounts = request.form.get("discount")
-    # net_prices = request.form.get("net_price")
-    # totals = request.form.get("total")
-    # lead_times = request.form.get("lead_time")
-    # quote_body = []
-    # quote_row = {}
-    # for i in range(len(lines)):
-        # quote_row["line"] = lines[i]
-        # quote_row["item"] = items[i]
-        # quote_row["description"] = descriptions[i]
-        # quote_row["quantity"] = quantities[i]
-        # quote_row["list_price"] = list_prices[i]
-        # quote_row["discount"] = discounts[i]
-        # quote_row["net_price"] = net_prices[i]
-        # quote_row["total"] = totals[i]
-        # quote_row["status"] = status[i]
-
-
-
     if request.method == "POST":
-        # Get the full json data
-        full_quote = request.get_json()
-        # Separate header from body
-        quote_header = full_quote["quote_header"]
-        quote_body = full_quote["quote_body"]
-        # Update first headers table to generate the quote number
-        db.execute ("INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)", quote_header["customer_id"], quote_header["created_by"])
+        # Get the quote_lines from the frontend form
+        data = request.form.get("data")
+        # Format the string into json
+        quote_lines = json.loads(data)
+        # Check the user has provided a valid customer_id:
+        customer = db.execute(
+            "SELECT * FROM customers WHERE id = ?", request.form.get("customer_id")
+        )
+        if not customer:
+            return render_template("error.html", message="Customer not valid")
+        # Get the list of current valid items to compare with inputs
+        items_list = db.execute("SELECT * FROM items")
+        items = []
+        # Make a new list with only the items_id
+        for i in range(len(items_list)):
+            items.append(items_list[i]["id"])
+        # Validate all user's line level inputs:
+        for i in range((len(quote_lines))-1):
+            if not quote_lines[i+1]["item"] or int(quote_lines[i+1]["item"]) not in items:
+                message = "Invalid item in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not quote_lines[i+1]["quantity"] or int(quote_lines[i+1]["quantity"]) <= 0:
+                message = "Invalid quantity in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not quote_lines[i+1]["list_price"] or float(quote_lines[i+1]["list_price"]) <= 0:
+                message = "Invalid price in line " + str(i+1)
+                return render_template("error.html", message=message)
+        
+        # Create quote_header table to generate the quote number
+        db.execute(
+            "INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)",
+            request.form.get("customer_id"), session["username"]
+        )
         # Get the quote number to use it in quote body
         last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
         quote_number = last_header[0]["quote_num"]
-        # Loop through all lines of quote body and insert into quote body table
-        for i in range(len(quote_body)):
-            line_net_total = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"]) *  quote_body[i]["quantity"]
+        # Loop through all lines of quote_lines and insert them into quote_body table
+        for i in range((len(quote_lines))-1):
+            line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
             db.execute(
                 "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                quote_number, quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], 
-                quote_body[i]["list_price"], quote_body[i]["discounts"], line_net_total, quote_body[i]["lead_time"]
+                quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), int(quote_lines[i+1]["quantity"]), 
+                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
             )
         # Get the full total from body to update headers table
         full_net_total = db.execute(
@@ -377,7 +372,9 @@ def create_quote():
             "UPDATE quote_header SET total_net_value = ? WHERE quote_num = ?",
             full_net_total[0]["SUM(line_net_total)"], quote_number
         )
-        return jsonify({"message": "quote created"})
+        
+        # Show the list of all recently created quotes
+        return redirect("/get_quotes_list")
     
     return render_template("new_quote.html")
 
