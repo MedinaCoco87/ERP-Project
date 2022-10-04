@@ -380,6 +380,20 @@ def create_quote():
     return render_template("new_quote.html")
 
 
+@app.route("/edit_quote", methods=["GET", "POST"])
+def edit_quote():
+    if request.method == "POST":
+        pass
+    
+    header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ?", request.args.get("quote_num")
+    )
+    bodies = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ?", request.args.get("quote_num")
+    )
+    return render_template("edit_quote.html", header=header, bodies=bodies)
+
+
 # Pending implementation in frontend
 @app.route("/get_quote_by_id/<quote_id>", methods = ["GET"])
 def get_quote_by_id(quote_id):

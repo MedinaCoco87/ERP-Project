@@ -10,18 +10,19 @@
 <div id="title" class="h2 text-center">Quote Details</div>
 <form action="/edit_quote" method="get">
     <div>
-        <label for="creation_date">Creation Date:</label>
-        <input id="creation_date" type="date" Style="max-width: 110px;" value="{{ header[0]['date'] }}" disabled>
+        <label style="width: 110px;" for="creation_date">Creation Date:</label>
+        <input id="creation_date" type="date" style="width: 110px;" value="{{ header[0]['date'] }}" disabled>
     </div>
     <div>
-        <label for="quote_id">Quote No:</label>
-        <input type="text" name="quote_id" id="quote_id" placeholder="Quote No." style="max-width: 110px;" value="{{ header[0]['quote_num'] }}" disabled>
-    </div> <!-- Bring the quote number once is created-->
+        <label style="width: 110px;" for="quote_id">Quote No:</label>
+        <input type="text" name="quote_num" id="quote_num" placeholder="Quote No." style="width: 110px;" value="{{ header[0]['quote_num'] }}" readonly>
+        <!-- Change the style to make :disabled and :readonly element look the same-->
+    </div>
     <div class="flex-container" style="margin-bottom: 5px;">
-        <label for="customer_id">Customer ID:</label>
-        <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="max-width: 110px;" value="{{ header[0]['customer_id'] }}" disabled>
-        <label for="company_name">Company Name:</label>
-        <input style="max-width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" disabled>
+        <label style="width: 110px;" for="customer_id">Customer ID:</label>
+        <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="width: 110px;" value="{{ header[0]['customer_id'] }}" disabled>
+        <label style="width: 120px;" for="company_name">Company Name:</label>
+        <input style="width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" disabled>
     </div>
     <!-- This one below is the div of the table-->
     <div>
@@ -65,9 +66,6 @@
         <input type="text" id="tax_amount" value="{{ header[0]['total_net_value'] * 0.18 }}" disabled>
         <label for="total_tax_included">Total Tax Included</label>
         <input type="text" name="total_tax_included" id="total_tax_included" value="{{ header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18) }}" disabled>
-    </div>
-    <div>
-        <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
     </div>
     <div style="display: flex; justify-content: flex-end; margin: 10px;">
         <button class="btn btn-outline-danger" type="submit">Edit</button>
