@@ -27,7 +27,7 @@
                     <td>{{ quote["date"] }}</td>
                     <td>{{ quote["customer_id"] }}</td>
                     <td>{{ quote["company_name"]}}</td>
-                    <td>{{ quote["total_net_value"] }}</td>
+                    <td>{{ "%.2f"|format(quote["total_net_value"]) }}</td>
                     <td>{{ quote["created_by"] }}</td>
                     <td>    
                         <button class="btn btn-success" name="quote_num" value="{{ quote['quote_num'] }}" type="submit">Details</button>

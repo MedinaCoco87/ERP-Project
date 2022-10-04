@@ -48,10 +48,10 @@
                         <td style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" style="width: 100%;" type="text" value="{{ body['item_id'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" value="{{ body['item_desc'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" style="width: 100%;" type="text" value="{{ body['quantity'] }}" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" style="width: 100%;" type="text" value="{{ body['list_price'] }}" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" style="width: 100%;" type="text" value="{{ body['discounts'] }}" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="{{ body['list_price'] * (1 - body['discounts']) }}"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ body['line_net_total'] }}"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discounts']) }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['list_price'] * (1 - body['discounts'])) }}"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="lead_time[]" class="lead_time" style="width: 100%;" type="text" value="{{ body['lead_time'] }}" disabled></td>
                         <td style="padding: 0.5px; margin: 1px"><input name="status[]" input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" disabled></td>
                     </tr>
@@ -61,11 +61,11 @@
     </div>
     <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
         <label for="total_net_value">Total Net Value</label>
-        <input type="text" name="total_net_value" id="total_net_value" value="{{ header[0]['total_net_value'] }}" disabled>
+        <input type="text" name="total_net_value" id="total_net_value" value="{{ '%.2f'|format(header[0]['total_net_value']) }}" disabled>
         <label for="tax_amount">Tax Amount</label>
-        <input type="text" id="tax_amount" value="{{ header[0]['total_net_value'] * 0.18 }}" disabled>
+        <input type="text" id="tax_amount" value="{{ '%.2f'|format(header[0]['total_net_value'] * 0.18) }}" disabled>
         <label for="total_tax_included">Total Tax Included</label>
-        <input type="text" name="total_tax_included" id="total_tax_included" value="{{ header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18) }}" disabled>
+        <input type="text" name="total_tax_included" id="total_tax_included" value="{{ '%.2f'|format(header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18)) }}" disabled>
     </div>
     <div style="display: flex; justify-content: flex-end; margin: 10px;">
         <button class="btn btn-outline-danger" type="submit">Edit</button>

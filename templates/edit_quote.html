@@ -14,7 +14,7 @@
         </div>
         <div>
             <label style="width: 110px;" for="quote_id">Quote No:</label>
-            <input type="text" name="quote_id" id="quote_id" placeholder="Quote No." style="width: 110px;" value="{{ header[0]['quote_num'] }}" readonly>
+            <input type="text" name="quote_num" id="quote_num" placeholder="Quote No." style="width: 110px;" value="{{ header[0]['quote_num'] }}" readonly>
         </div>
         <div class="flex-container" style="margin-bottom: 5px;">
             <label style="width: 110px;" for="customer_id">Customer ID:</label>
@@ -60,10 +60,10 @@
                             <td id="item_01" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ body['list_price'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ body['discounts'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" value="{{ body['list_price'] * (1 - body['discounts']) }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ body['line_net_total'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discounts']) }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discounts'])) }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input name="lead_time[]" class="lead_time" style="width: 100%;" type="text" value="{{ body['lead_time'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input name="status[]" input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" readonly></td>
                             <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
@@ -97,6 +97,7 @@
         <button class="btn btn-secondary" type="submit">Home</button>
     </form>
     <script>
+        // Corrects all id's and in-function line_references
         tbody = document.querySelector('tbody');
         rows = tbody.children;
         for (let i = 0; i < (rows.length) - 1; i++){
@@ -122,7 +123,7 @@
             columns[10].setAttribute('onclick', onClickValue);
         };
 
-        // This section will update grand totals
+        // This section will update grand totals on page onload.
         let totals = document.getElementsByClassName('total');
         // Get the total net value
         let totalNetValue = 0;
