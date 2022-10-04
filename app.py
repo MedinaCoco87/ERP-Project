@@ -313,7 +313,8 @@ def get_quote_details():
     quote_id = request.args.get("quote_num")
     header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
     bodies = db.execute("SELECT * FROM quote_body WHERE quote_num = ?", quote_id)
-    return render_template("quote_details.html", header=header, bodies=bodies)
+    length = len(bodies)
+    return render_template("quote_details.html", length=length, header=header, bodies=bodies)
 
 
 # Pending implementation in frontend
@@ -350,8 +351,8 @@ def create_quote():
         
         # Create quote_header table to generate the quote number
         db.execute(
-            "INSERT INTO quote_header (customer_id, created_by) VALUES (?, ?)",
-            request.form.get("customer_id"), session["username"]
+            "INSERT INTO quote_header (customer_id, company_name, created_by) VALUES (?, ?, ?)",
+            request.form.get("customer_id"), request.form.get("company_name"), session["username"]
         )
         # Get the quote number to use it in quote body
         last_header = db.execute("SELECT * FROM quote_header ORDER BY quote_num DESC LIMIT 1")
@@ -360,8 +361,8 @@ def create_quote():
         for i in range((len(quote_lines))-1):
             line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
             db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), int(quote_lines[i+1]["quantity"]), 
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
                 float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
             )
         # Get the full total from body to update headers table
@@ -377,6 +378,75 @@ def create_quote():
         return redirect("/get_quotes_list")
     
     return render_template("new_quote.html")
+
+
+@app.route("/edit_quote", methods=["GET", "POST"])
+def edit_quote():
+    if request.method == "POST": 
+        # Will validate all user input as if this was a complete new quote
+        data = request.form.get("data")
+        quote_lines = json.loads(data)
+        # Check the user has provided a valid customer_id:
+        customer = db.execute(
+            "SELECT * FROM customers WHERE id = ?", request.form.get("customer_id")
+        )
+        if not customer:
+            return render_template("error.html", message="Customer not valid")
+        # Get the list of current valid items to compare with inputs
+        items_list = db.execute("SELECT * FROM items")
+        items = []
+        # Make a new list with only the items_id
+        for i in range(len(items_list)):
+            items.append(items_list[i]["id"])
+        # Validate all user's line level inputs:
+        for i in range((len(quote_lines))-1):
+            if not quote_lines[i+1]["item"] or int(quote_lines[i+1]["item"]) not in items:
+                message = "Invalid item in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not quote_lines[i+1]["quantity"] or int(quote_lines[i+1]["quantity"]) <= 0:
+                message = "Invalid quantity in line " + str(i+1)
+                return render_template("error.html", message=message)
+            if not quote_lines[i+1]["list_price"] or float(quote_lines[i+1]["list_price"]) <= 0:
+                message = "Invalid price in line " + str(i+1)
+                return render_template("error.html", message=message)
+        # Validate quote_header info
+        header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND company_name = ? AND customer_id = ?",
+            request.form.get("quote_num"), request.form.get("company_name"), request.form.get("customer_id")
+        )
+        if not header:
+            return render_template("error.html", message="Unauthorized modification")
+        # Remove all original lines from quote_body
+        db.execute(
+            "DELETE FROM quote_body WHERE quote_num = ?", request.form.get("quote_num")
+        )
+        # Loop through all lines of quote_lines and insert them into quote_body table
+        total_net_value = 0
+        for i in range((len(quote_lines))-1):
+            line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
+            total_net_value = total_net_value + line_net_total
+            db.execute(
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discounts, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                request.form.get("quote_num"), quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
+                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
+            )
+        # Update quote_header line_net_total and user
+        db.execute(
+            "UPDATE quote_header SET total_net_value = ?, created_by = ? WHERE quote_num = ?",
+            total_net_value, session["username"], request.form.get("quote_num")
+        )
+        # Send the user to the list of all quotes
+        return redirect("/get_quotes_list")
+
+
+    # if methods = "GET"
+    header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ?", request.args.get("quote_num")
+    )
+    bodies = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ?", request.args.get("quote_num")
+    )
+    return render_template("edit_quote.html", header=header, bodies=bodies)
 
 
 # Pending implementation in frontend

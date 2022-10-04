@@ -323,3 +323,36 @@ CREATE TABLE delivery_body (id INTEGER NOT NULL, item_id INTEGER NOT NULL, line_
 
 *SQL* CREATE TABLE invoice_header (invoice_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT NOT NULL, total_tax_amount FLOAT, payment_terms TEXT DEFAULT COD, due_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT UNPAID, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username) ON DELETE RESTRICT);
 *SQL* CREATE TABLE invoice_body (invoice_num INTEGER NOT NULL, line_ref INTEGER, sorder_num INTEGER, delivery_id INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, tax_amount FLOAT NOT NULL, FOREIGN KEY (invoice_num) REFERENCES invoice_header (invoice_num) ON DELETE CASCADE, FOREIGN KEY (sorder_num) REFERENCES sorder_header (order_num) ON DELETE RESTRICT, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, FOREIGN KEY (delivery_id) REFERENCES delivery_header (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND net_price > 0 AND tax_amount >= 0));
+
+DROP TABLE quote_body;
+DROP TABLE quote_header;
+
+CREATE TABLE quote_header (
+    quote_num INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    company_name TEXT NOT NULL,
+    date DATE DEFAULT CURRENT_DATE,
+    total_net_value FLOAT DEFAULT 0.0,
+    created_by TEXT NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers (id),
+    FOREIGN KEY (created_by) REFERENCES users (username))
+
+*SQL* CREATE TABLE quote_header (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT DEFAULT 0.0, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
+
+CREATE TABLE quote_body (
+    quote_num INTEGER NOT NULL, 
+    line_ref INTEGER, 
+    item_id INTEGER NOT NULL, 
+    item_desc TEXT NOT NULL, 
+    quantity INTEGER NOT NULL, 
+    list_price FLOAT,
+    discounts FLOAT, 
+    line_net_total FLOAT NOT NULL,
+    lead_time INT NOT NULL, 
+    status TEXT NOT NULL DEFAULT PENDING, 
+    FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, 
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, 
+    CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1)
+    );
+
+*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discounts FLOAT, line_net_total FLOAT NOT NULL, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1));
