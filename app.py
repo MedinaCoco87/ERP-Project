@@ -493,78 +493,88 @@ def get_quotes_by_customer_name():
 
 
 # Pending implementation in frontend
-@app.route("/convert_quote_to_sorder", methods = ["POST"])
+@app.route("/convert_quote_to_sorder", methods = ["GET", "POST"])
 def convert_quote_to_sorder():
-    sorder_input = request.get_json()
+    if request.method == "GET":
+        quote_num = request.args.get("quote_num")
+        header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ?", quote_num
+        )
+        bodies = db.execute(
+            "SELECT * FROM quote_body WHERE quote_num = ?", quote_num
+        )
+        return render_template("create_sorder.html", header=header, bodies=bodies)
+    
+    #sorder_input = request.get_json()
 
     # Check there is a quote_header row that matches both customer_id and quote_num
-    quote_header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
-        sorder_input["quote_num"], sorder_input["customer_id"])
+    #quote_header = db.execute(
+        #"SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
+        #sorder_input["quote_num"], sorder_input["customer_id"])
 
-    if not quote_header:
-        return jsonify({"message": "invalid quote_num customer_id combination"}), 400
+    #if not quote_header:
+        #return jsonify({"message": "invalid quote_num customer_id combination"}), 400
     
     # Get ALL the item lines from quote_body with status "PENDING"
-    quote_body = db.execute(
-        "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?", 
-        sorder_input["quote_num"], "PENDING"
-    )
+    #quote_body = db.execute(
+        #"SELECT * FROM quote_body WHERE quote_num = ? AND status = ?", 
+        #sorder_input["quote_num"], "PENDING"
+    #)
 
     # Making sure the quote has some pending items to be converted
-    if not quote_body:
-        return jsonify({"message": "this quote is no longer available"}), 400
+    #if not quote_body:
+        #return jsonify({"message": "this quote is no longer available"}), 400
 
     # Create the sorder_header to generate the order_num
-    db.execute(
-        "INSERT INTO sorder_header (customer_id, created_by) VALUES (?, ?)",
-        sorder_input["customer_id"], sorder_input["created_by"]
-    )
+    #db.execute(
+        #"INSERT INTO sorder_header (customer_id, created_by) VALUES (?, ?)",
+        #sorder_input["customer_id"], sorder_input["created_by"]
+    #)
     
     # Get the sorder_header just created to use its order_num
-    sorder_header = db.execute(
-        "SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
-    )
+    #sorder_header = db.execute(
+        #"SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
+    #)
 
     # Insert converted items as rows in sorder_body.
     # Keep track of total_net_value to update it in sorder_header
-    total_net_value = 0
-    for i in range(len(quote_body)):
-        net_price = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"])
-        total_net_value = total_net_value + (net_price * quote_body[i]["quantity"])
-        db.execute(
-            "INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
-            sorder_input["delivery_date"], quote_body[i]["quote_num"]
-        )
+    #total_net_value = 0
+    #for i in range(len(quote_body)):
+        #net_price = quote_body[i]["list_price"] * (1 - quote_body[i]["discounts"])
+        #total_net_value = total_net_value + (net_price * quote_body[i]["quantity"])
+        #db.execute(
+            #"INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            #sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
+           # sorder_input["delivery_date"], quote_body[i]["quote_num"]
+        #)
         # Get the current row of stock for the item
-        stock_row = db.execute( 
-            "SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
-        )
+        #stock_row = db.execute( 
+            #"SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
+        #)
         # Calculate the new stock values for the columns affected
-        new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
-        new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
+        #new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
+        #new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
         # Update item values in stock table (+stock_onsale, -stock_available)
-        db.execute(
-            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
-            new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
-        )
+        #db.execute(
+            #"UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
+            #new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
+        #)
 
     # Update sorder_header with the total_net_value
-    db.execute(
-        "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
-        total_net_value, sorder_header[0]["order_num"]
-    )
+    #db.execute(
+        #"UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
+        #total_net_value, sorder_header[0]["order_num"]
+    #)
 
     # Update status of quote_body items to "sold"
-    db.execute(
-        "UPDATE quote_body SET status = ? WHERE quote_num = ?",
-        "SOLD", sorder_input["quote_num"]
-    )
+    #db.execute(
+        #"UPDATE quote_body SET status = ? WHERE quote_num = ?",
+        #"SOLD", sorder_input["quote_num"]
+    #)
 
     # Return success message
-    return jsonify({"message": "sales_order created", "order_num": sorder_header[0]["order_num"]}
-    )
+    #return jsonify({"message": "sales_order created", "order_num": sorder_header[0]["order_num"]}
+    #)
 
 
 # Pending implementation in frontend

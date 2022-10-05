@@ -1,16 +1,13 @@
 
-// Set the current date as the max allowed date in quotes.
+// Set the current date as the max allowed date in creation forms.
 let today = new Date()
 let dd = String(today.getDate()).padStart(2, '0');
 let mm = String(today.getMonth() + 1).padStart(2, '0');
 let yyyy = today.getFullYear();
-
 today = yyyy + '-' + mm + '-' + dd;
-console.log(today);
-
-quoteDate = document.querySelector('#quote_date');
-quoteDate.setAttribute('max', today);
-quoteDate.setAttribute('value', today);
+currentDate = document.querySelector('#current_date');
+currentDate.setAttribute('max', today);
+currentDate.setAttribute('value', today);
 
 
 function newLine(){
