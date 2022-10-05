@@ -173,6 +173,7 @@ CREATE TABLE sorder_header (
     order_num INTEGER PRIMARY KEY AUTOINCREMENT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     customer_id INTEGER NOT NULL,
+    company_name TEXT NOT NULL,
     total_net_value FLOAT,
     status TEXT DEFAULT PENDING,
     created_by TEXT NOT NULL,
@@ -180,22 +181,24 @@ CREATE TABLE sorder_header (
     FOREIGN KEY (created_by) REFERENCES users (username)
 )
 
-*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, total_net_value FLOAT, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
+*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, total_net_value FLOAT, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
 
 CREATE TABLE sorder_body (
     order_num INTEGER NOT NULL,
     line_ref INTEGER,
     item_id INTEGER NOT NULL,
+    item_desc TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     net_price FLOAT NOT NULL,
     delivery_date DATE DEFAULT CURRENT_DATE,
     status TEXT DEFAULT PENDING,
+    po_number BLOB,
     quote_num INTEGER,
     FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
 )
 
-*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
+*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, po_number BLOB, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
 
 *SQL* DROP TABLE invoices
 
