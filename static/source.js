@@ -210,6 +210,10 @@ function calculateNetPriceAndTotal(lineId){
     let discountElement = listPriceElement.nextElementSibling;
     let inputOfDiscount = discountElement.firstElementChild;
     let discount = inputOfDiscount.value;
+    if(!discount || discount > 1){
+        discount = 0;
+        inputOfDiscount.value = 0
+    };
     // Calculate new net_price
     let netPrice = Math.round(((listPrice * (1 - discount)) + Number.EPSILON) * 100) / 100;
     // Get the net_price element and update the value
