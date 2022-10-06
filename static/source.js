@@ -210,9 +210,13 @@ function calculateNetPriceAndTotal(lineId){
     let discountElement = listPriceElement.nextElementSibling;
     let inputOfDiscount = discountElement.firstElementChild;
     let discount = inputOfDiscount.value;
-    if(!discount || discount > 1){
+    if(!discount || discount < 0){
         discount = 0;
         inputOfDiscount.value = 0
+    };
+    if(discount > 1){
+        discount = discount / 100;
+        inputOfDiscount.value = discount;
     };
     // Calculate new net_price
     let netPrice = Math.round(((listPrice * (1 - discount)) + Number.EPSILON) * 100) / 100;
@@ -273,6 +277,50 @@ function gatherData(){
     rowLine["net_price"] = netPrices[i].value;
     rowLine["total"] = totals[i].value;
     rowLine["lead_time"] = leadTimes[i].value;
+    rowFullList[i] = rowLine;
+    };
+    console.log(rowFullList);
+    // Get text area element
+    dataElement = document.getElementById('data');
+    data = "[";
+    for (let i = 0; i < rowFullList.length; i++){
+        myJson = JSON.stringify(rowFullList[i]);
+        data = data + myJson + ",";
+    };
+    data = data.substring(0, data.length - 1);
+    data = data + "]";
+    dataElement.innerHTML = data;
+};
+
+function gatherDataSorder(){
+    lines = document.getElementsByClassName("line");
+    items = document.getElementsByClassName("item");
+    descriptions = document.getElementsByClassName("description");
+    quantities = document.getElementsByClassName("quantity");
+    listPrices = document.getElementsByClassName("list_price");
+    discounts = document.getElementsByClassName("discount");
+    netPrices = document.getElementsByClassName("net_price");
+    totals = document.getElementsByClassName("total");
+    deliveryDates = document.getElementsByClassName("delivery_date");
+    poNum = document.getElementsByClassName("po_num");
+    quoteNum = document.getElementsByClassName("quote_num");
+    rowFullList = [];
+    for (let i = 0; i < lines.length; i++){
+        console.log(quantities[i].value);
+    }
+    for (let i = 0; i < lines.length; i++){
+    rowLine = {};
+    rowLine["line"] = lines[i].value;
+    rowLine["item"] = items[i].value;
+    rowLine["description"] = descriptions[i].value;
+    rowLine["quantity"] = quantities[i].value;
+    rowLine["list_price"] = listPrices[i].value;
+    rowLine["discount"] = discounts[i].value;
+    rowLine["net_price"] = netPrices[i].value;
+    rowLine["total"] = totals[i].value;
+    rowLine["delivery_date"] = deliveryDates[i].value;
+    rowLine["po_num"] = poNum[i].value;
+    rowLine["quote_num"] = quoteNum[i].value;
     rowFullList[i] = rowLine;
     };
     console.log(rowFullList);

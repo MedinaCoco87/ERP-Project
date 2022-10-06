@@ -505,16 +505,31 @@ def convert_quote_to_sorder():
         )
         return render_template("create_sorder.html", header=header, bodies=bodies)
     
-    #sorder_input = request.get_json()
+    # Get the data provided by user
+    data = request.form.get("data")
+    sorder_lines = json.loads(data)
 
     # Check there is a quote_header row that matches both customer_id and quote_num
-    #quote_header = db.execute(
-        #"SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
-        #sorder_input["quote_num"], sorder_input["customer_id"])
-
-    #if not quote_header:
-        #return jsonify({"message": "invalid quote_num customer_id combination"}), 400
+    quote_header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
+        sorder_lines[0]["quote_num"], request.form.get("customer_id"))
+    if not quote_header:
+        return render_template("error.html", message="invalid quote number or customer id")
     
+    # Check quote_num, item_id and pending quantity are valid for all lines
+    for i in range(len(sorder_lines - 1):
+        query = db.execute(
+            "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND status = ?",
+            sorder_lines[0]["quote_num"], sorder_lines[i + 1]["item"], "PENDING"
+        )
+        if not query:
+            message = "Not PENDING quantities in this quote for item " + str(sorder_lines[i + 1]["item"]) + "." 
+            return render_template("error.html", message=message)
+        if query[0]["quantity"] < sorder_lines[i + 1]["quantity"]:
+            message = "You are exceding pending quantity for item " + str(sorder_lines[i + 1]["item"]) + "."
+            return render_template("error.html", message=message)
+
+    return redirect("/")
     # Get ALL the item lines from quote_body with status "PENDING"
     #quote_body = db.execute(
         #"SELECT * FROM quote_body WHERE quote_num = ? AND status = ?", 

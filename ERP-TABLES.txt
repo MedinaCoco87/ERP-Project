@@ -190,6 +190,7 @@ CREATE TABLE sorder_body (
     item_desc TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     net_price FLOAT NOT NULL,
+    line_net_total FLOAT NOT NULL,
     delivery_date DATE DEFAULT CURRENT_DATE,
     status TEXT DEFAULT PENDING,
     po_number BLOB,
@@ -198,7 +199,7 @@ CREATE TABLE sorder_body (
     FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
 )
 
-*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, po_number BLOB, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
+*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, net_price FLOAT NOT NULL, line_net_total FLOAT NOT NULL, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, po_number BLOB, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
 
 *SQL* DROP TABLE invoices
 

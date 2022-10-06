@@ -73,8 +73,7 @@
 </form>
 <form method="get" action="/convert_quote_to_sorder" style="padding: 3px">
     <input type="text" name="quote_num" value="{{ header[0]['quote_num'] }}" hidden>
-    <button type="submit">Convert</button>
-    <!-- Add class="btn btn-warning" when is fully implemented-->
+    <button class="btn btn-danger" type="submit">Convert</button>
 </form>
 <form method="get" action="/get_quotes_list" style="padding: 3px">
     <button class="btn btn-warning" type="submit">Back to Quotes</button>
