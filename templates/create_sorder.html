@@ -59,7 +59,7 @@
                     {% for body in bodies %}
                         <tr id="line_01">
                             <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
-                            <td id="item_01" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}"></td>
+                            <td id="item_01" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}" readonly></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}" readonly></td>
