@@ -350,7 +350,8 @@ CREATE TABLE quote_body (
     item_desc TEXT NOT NULL, 
     quantity INTEGER NOT NULL, 
     list_price FLOAT,
-    discounts FLOAT, 
+    discount FLOAT,
+    net_price FLOAT, 
     line_net_total FLOAT NOT NULL,
     lead_time INT NOT NULL, 
     status TEXT NOT NULL DEFAULT PENDING, 
@@ -359,4 +360,4 @@ CREATE TABLE quote_body (
     CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1)
     );
 
-*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discounts FLOAT, line_net_total FLOAT NOT NULL, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1));
+*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discount FLOAT, net_price FLOAT, line_net_total FLOAT NOT NULL, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discount < 1));
