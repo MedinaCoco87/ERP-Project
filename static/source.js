@@ -301,13 +301,11 @@ function gatherDataSorder(){
     discounts = document.getElementsByClassName("discount");
     netPrices = document.getElementsByClassName("net_price");
     totals = document.getElementsByClassName("total");
+    leadTimes = document.getElementsByClassName("lead_time");
     deliveryDates = document.getElementsByClassName("delivery_date");
     poNum = document.getElementsByClassName("po_num");
     quoteNum = document.getElementsByClassName("quote_num");
     rowFullList = [];
-    for (let i = 0; i < lines.length; i++){
-        console.log(quantities[i].value);
-    }
     for (let i = 0; i < lines.length; i++){
     rowLine = {};
     rowLine["line"] = lines[i].value;
@@ -318,8 +316,12 @@ function gatherDataSorder(){
     rowLine["discount"] = discounts[i].value;
     rowLine["net_price"] = netPrices[i].value;
     rowLine["total"] = totals[i].value;
+    rowLine["lead_time"] = leadTimes[i].value;
     rowLine["delivery_date"] = deliveryDates[i].value;
     rowLine["po_num"] = poNum[i].value;
+    if (!rowLine["po_num"]){
+        rowLine["po_num"] = "0"
+    };
     rowLine["quote_num"] = quoteNum[i].value;
     rowFullList[i] = rowLine;
     };
