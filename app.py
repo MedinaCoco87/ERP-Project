@@ -359,11 +359,12 @@ def create_quote():
         quote_number = last_header[0]["quote_num"]
         # Loop through all lines of quote_lines and insert them into quote_body table
         for i in range((len(quote_lines))-1):
-            line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
+            net_price = round(float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])), 2)
+            line_net_total =  net_price *  int(quote_lines[i+1]["quantity"])
             db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 quote_number, quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
-                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
+                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"]
             )
         # Get the full total from body to update headers table
         full_net_total = db.execute(
@@ -423,12 +424,13 @@ def edit_quote():
         # Loop through all lines of quote_lines and insert them into quote_body table
         total_net_value = 0
         for i in range((len(quote_lines))-1):
-            line_net_total = float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])) *  int(quote_lines[i+1]["quantity"])
+            net_price = round(float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])), 2)
+            line_net_total = net_price *  int(quote_lines[i+1]["quantity"])
             total_net_value = total_net_value + line_net_total
             db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 request.form.get("quote_num"), quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
-                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), line_net_total, quote_lines[i+1]["lead_time"]
+                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"]
             )
         # Update quote_header line_net_total and user
         db.execute(
@@ -524,20 +526,24 @@ def convert_quote_to_sorder():
     # Multiple quotes to one sorder not allowed in this version of the program.
     for i in range((len(sorder_lines)) - 1):
         query = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND status = ?",
-            sorder_lines[1]["quote_num"], sorder_lines[i + 1]["item"], "PENDING"
+            "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ?",
+            int(sorder_lines[1]["quote_num"]), int(sorder_lines[i + 1]["item"]), float(sorder_lines[i + 1]["net_price"]), "PENDING"
         )
         if not query:
-            message = "Not PENDING lines in this quote for item " + str(sorder_lines[i + 1]["item"]) + "." 
+            message = "No pending lines in this quote at this price for item " + str(sorder_lines[i + 1]["item"]) + "." 
             return render_template("error.html", message=message)
         # Making sure the program considers all lines that matches the query
         # Hacer que si llega al final del loop y no encuentra una linea con la cantidad...
         # ... suficiente, que arroje el error, pero no antes.
-        for i in range(len(query)):
-            if int(query[i]["quantity"]) >= int(sorder_lines[i + 1]["quantity"]):
+        for j in range(len(query)):
+            if int(query[j]["quantity"]) >= int(sorder_lines[i + 1]["quantity"]):
                 break
-            message = "No quote line with enough pending quantity for item " + str(sorder_lines[i + 1]["item"]) + "."
-            return render_template("error.html", message=message)
+            if j == (len(query) - 1):
+                message = "No quote line with enough pending quantity for item " + str(sorder_lines[i + 1]["item"]) + "."
+                return render_template("error.html", message=message)
+
+        return redirect("/")
+        
         # Create sorder_header
         db.execute(
             "INSERT INTO sorder_header (customer_id, company_name, created_by) VALUES (?, ?, ?)", 
@@ -550,6 +556,7 @@ def convert_quote_to_sorder():
         if not sorder_header:
             return render_template("error.html", message="error while creating sorder_header")
         
+
         # Create the sorder_body
         for i in range(len(sorder_lines)):
             net_price = float(sorder_lines[i + 1]["list_price"]) * (1 - float(sorder_lines[i + 1]["discount"]))

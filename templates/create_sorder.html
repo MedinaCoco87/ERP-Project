@@ -63,8 +63,8 @@
                             <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}" readonly></td>
-                            <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discounts']) }}" readonly></td>
-                            <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discounts'])) }}" disabled></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discount']) }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discount'])) }}" disabled></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" required></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text"></td>
