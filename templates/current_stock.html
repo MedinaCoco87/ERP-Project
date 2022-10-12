@@ -9,17 +9,16 @@
     <table class="table" style="text-align: center; margin-bottom: 6px;">
         <thead class="table-light">
             <tr>
-                <th>Category</th>
-                <th>Item</th>
-                <th>Description</th>
-                <th>Company Name</th>
-                <th>Total</th>
-                <th>Approved</th>
-                <th>QC</th>
-                <th>Rejected</th>
-                <th>Sold</th>
-                <th>Incoming</th>
-                <th>Available</th>
+                <th style="width: 6%;">Category</th>
+                <th style="width: 8%;">Item</th>
+                <th style="width: 30%;">Description</th>
+                <th style="width: 8%;">Total</th>
+                <th style="width: 8%;">Approved</th>
+                <th style="width: 8%;">QC</th>
+                <th style="width: 8%;">Rejected</th>
+                <th style="width: 8%;">On Sale</th>
+                <th style="width: 8%;">Incoming</th>
+                <th style="width: 8%;">Available</th>
             </tr>
         </thead>
         <tbody>
@@ -27,7 +26,6 @@
             <tr>
                 <td>{{ stock["category_id"] }}</td>
                 <td>{{ stock["item_id"] }}</td>
-                <td>{{ stock["item_description"] }}</td>
                 <td>{{ stock["item_description"] }}</td>
                 <td>{{ stock["stock_total"] }}</td>
                 <td>{{ stock["stock_approved"] }}</td>

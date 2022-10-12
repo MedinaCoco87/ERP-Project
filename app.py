@@ -445,8 +445,10 @@ def edit_quote():
             "UPDATE quote_header SET total_net_value = ?, created_by = ? WHERE quote_num = ?",
             total_net_value, session["username"], request.form.get("quote_num")
         )
-        # Send the user to the list of all quotes
-        return redirect("/get_quotes_list")
+
+        # Send the user to the detail of the current quote
+        session["temp_variable"] = request.form.get("quote_num")
+        return redirect("/quote_details")
 
 
     # if methods = "GET"
@@ -566,7 +568,7 @@ def convert_quote_to_sorder():
     if not sorder_header:
         return render_template("error.html", message="Fatal error while creating sorder_header")
     
-    # Create the sorder_body
+    # Create the sorder_body and update stock table
     for i in range(len(sorder_lines)- 1):
         net_price = float(sorder_lines[i + 1]["list_price"]) * (1 - float(sorder_lines[i + 1]["discount"]))
         line_net_total = net_price * int(sorder_lines[i + 1]["quantity"])
@@ -575,6 +577,15 @@ def convert_quote_to_sorder():
             sorder_header[0]["order_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"],
             sorder_lines[i + 1]["description"], sorder_lines[i + 1]["quantity"], net_price, line_net_total,
             sorder_lines[i + 1]["delivery_date"], "PENDING", sorder_lines[i + 1]["po_num"], sorder_lines[i + 1]["quote_num"]
+        )
+        item_stocks = db.execute(
+            "SELECT * FROM stock WHERE item_id = ?", sorder_lines[i + 1]["item"]
+        )
+        new_onsale = item_stocks[0]["stock_onsale"] + int(sorder_lines[i + 1]["quantity"])
+        new_available = item_stocks[0]["stock_available"] - int(sorder_lines[i + 1]["quantity"])
+        db.execute(
+            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
+            new_onsale, new_available, sorder_lines[i + 1]["item"]
         )
 
     # Update sorder_header total_net_value
@@ -649,9 +660,7 @@ def convert_quote_to_sorder():
                     last_try[0]["item_desc"], remaining_quantity, last_try[0]["list_price"], last_try[0]["discount"],
                     last_try[0]["net_price"], line_net_total, last_try[0]["lead_time"]
                 )
-    # Get the user to the detail of the current quote (change to sorder_detail when fully implemented)
-    session["temp_variable"] = sorder_lines[1]["quote_num"]
-    return redirect("/quote_details")
+    return redirect("/get_all_sorders")
     
 
 
