@@ -11,12 +11,13 @@
         <table class="table text-center">
             <thead class="table-light">
                 <tr>
-                    <th>Quote_num</th>
-                    <th>Date</th>
-                    <th>Customer ID</th>
-                    <th>Company Name</th>
-                    <th>Total Net Value</th>
-                    <th>Created by</th>
+                    <th style="width: 10%">Quote_num</th>
+                    <th style="width: 10%">Date</th>
+                    <th style="width: 10%">Customer ID</th>
+                    <th style="width: 25%">Company Name</th>
+                    <th style="width: 15%">Total Net Value</th>
+                    <th style="width: 20%">Status</th>
+                    <th style="width: 10%">Created by</th>
                     <th></th>
                 </tr>
             </thead>
@@ -28,6 +29,7 @@
                     <td>{{ quote["customer_id"] }}</td>
                     <td>{{ quote["company_name"]}}</td>
                     <td>{{ "%.2f"|format(quote["total_net_value"]) }}</td>
+                    <td>{{ quote["status"]}}</td>
                     <td>{{ quote["created_by"] }}</td>
                     <td>    
                         <button class="btn btn-success" name="quote_num" value="{{ quote['quote_num'] }}" type="submit">Details</button>

@@ -337,11 +337,12 @@ CREATE TABLE quote_header (
     company_name TEXT NOT NULL,
     date DATE DEFAULT CURRENT_DATE,
     total_net_value FLOAT DEFAULT 0.0,
+    status TEXT DEFAULT PENDING,
     created_by TEXT NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers (id),
     FOREIGN KEY (created_by) REFERENCES users (username))
 
-*SQL* CREATE TABLE quote_header (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT DEFAULT 0.0, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
+*SQL* CREATE TABLE quote_header (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT DEFAULT 0.0, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
 
 CREATE TABLE quote_body (
     quote_num INTEGER NOT NULL, 

@@ -461,6 +461,37 @@ def edit_quote():
     return render_template("edit_quote.html", header=header, bodies=bodies)
 
 
+@app.route("/delete_quote", methods=["GET", "POST"])
+def delete_quote():
+    if request.method == "GET":
+        quote_id = request.args.get("quote_num")    
+        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+        bodies = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", quote_id
+        )
+        length = len(bodies)
+        return render_template("delete_quote.html", length=length, header=header, bodies=bodies)
+
+    # Validate quote_num with customer_id and with total_net_value
+    quote_header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ? AND status = ? AND total_net_value = ?",
+        request.form.get("quote_num"), request.form.get("customer_id"), "PENDING", request.form.get("total_net_value")
+    )
+    if not quote_header:
+        return render_template("error.html", message="You can't delete this quote")
+    # Delete quote from table quote_header
+    db.execute(
+        "DELETE FROM quote_body WHERE quote_num = ?", request.form.get("quote_num")
+    )
+    # Delete quote from table quote_body
+    db.execute(
+        "DELETE FROM quote_header WHERE quote_num = ?", request.form.get("quote_num")
+    )
+    return redirect("/get_quotes_list")
+
+
+
+
 # Pending implementation in frontend
 @app.route("/get_quote_by_id/<quote_id>", methods = ["GET"])
 def get_quote_by_id(quote_id):
@@ -660,6 +691,41 @@ def convert_quote_to_sorder():
                     last_try[0]["item_desc"], remaining_quantity, last_try[0]["list_price"], last_try[0]["discount"],
                     last_try[0]["net_price"], line_net_total, last_try[0]["lead_time"]
                 )
+    # Update status of quote header
+    # Make sure quote_body status only allows "PENDING", "SOLD", "LOST" values.
+    statuses = db.execute(
+        "SELECT DISTINCT status FROM quote_body WHERE quote_num = ?",
+        sorder_lines[1]["quote_num"]
+    )
+    if len(statuses) == 1:
+        if statuses[0]["status"] == "SOLD":
+            db.execute(
+                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                "SOLD", sorder_lines[1]["quote_num"]
+            )
+        elif statuses[0]["status"] == "LOST":
+            db.execute(
+                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                "LOST", sorder_lines[1]["quote_num"]
+            )
+    elif len(statuses) == 2:
+        if statuses[0]["status"] != "PENDING" and statuses[1]["status"] != "PENDING":
+             db.execute(
+                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                "PARTIAL CLOSED", sorder_lines[1]["quote_num"]
+            )
+        else:
+            db.execute(
+            "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+            "PARTIAL OPEN", sorder_lines[1]["quote_num"]
+        )
+    else:
+        db.execute(
+            "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+            "PARTIAL OPEN", sorder_lines[1]["quote_num"]
+        )
+
+    print(statuses)
     return redirect("/get_all_sorders")
     
 
