@@ -439,9 +439,9 @@ def edit_quote():
             net_price = round(float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])), 2)
             line_net_total = net_price *  int(quote_lines[i+1]["quantity"])
             db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 request.form.get("quote_num"), quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
-                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"]
+                float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"], quote_lines[i+1]["status"]
             )
         
         # Update sorder_header total_net_value
@@ -733,138 +733,7 @@ def convert_quote_to_sorder():
             "PARTIAL OPEN", sorder_lines[1]["quote_num"]
         )
 
-    print(statuses)
     return redirect("/get_all_sorders")
-    
-
-
-
-            
-        
-
-    return redirect("/")
-    # Get ALL the item lines from quote_body with status "PENDING"
-    #quote_body = db.execute(
-        #"SELECT * FROM quote_body WHERE quote_num = ? AND status = ?", 
-        #sorder_input["quote_num"], "PENDING"
-    #)
-
-    # Insert converted items as rows in sorder_body.
-    # Keep track of total_net_value to update it in sorder_header
-    #total_net_value = 0
-    #for i in range(len(quote_body)):
-        #net_price = quote_body[i]["list_price"] * (1 - quote_body[i]["discount"])
-        #total_net_value = total_net_value + (net_price * quote_body[i]["quantity"])
-        #db.execute(
-            #"INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            #sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
-           # sorder_input["delivery_date"], quote_body[i]["quote_num"]
-        #)
-        # Get the current row of stock for the item
-        #stock_row = db.execute( 
-            #"SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
-        #)
-        # Calculate the new stock values for the columns affected
-        #new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
-        #new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
-        # Update item values in stock table (+stock_onsale, -stock_available)
-        #db.execute(
-            #"UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
-            #new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
-        #)
-
-    # Update sorder_header with the total_net_value
-    #db.execute(
-        #"UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
-        #total_net_value, sorder_header[0]["order_num"]
-    #)
-
-    # Update status of quote_body items to "sold"
-    #db.execute(
-        #"UPDATE quote_body SET status = ? WHERE quote_num = ?",
-        #"SOLD", sorder_input["quote_num"]
-    #)
-
-    # Return success message
-    #return jsonify({"message": "sales_order created", "order_num": sorder_header[0]["order_num"]}
-    #)
-
-
-# Pending implementation in frontend
-@app.route("/partial_quote_to_sorder", methods = ["POST"])
-def partial_quote_to_sorder():
-    user_input = request.get_json()
-    # Check the quote_num and customer_id provided are a valid combination
-    quote_header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
-        user_input["quote_num"], user_input["customer_id"]
-    )
-    if not quote_header:
-        return jsonify({"message": "invalid customer_id quote_num combination"})
-    
-    # Check items provided by user are valid for sale
-    items = user_input["items"]
-    quote_body = []
-    for i in range(len(items)):
-        quote_body_row = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND line_ref = ? AND status = ?",
-              user_input["quote_num"], items[i]["item_id"], items[i]["line_ref"], "PENDING" 
-        )
-        if not quote_body_row:
-            return jsonify({"message": "invalid item", "reference": items[i]["item_id"]}), 400
-        quote_body.append(quote_body_row[0])
-
-    # Create the sorder_header to generate the order_num
-    db.execute(
-        "INSERT INTO sorder_header (customer_id, created_by) VALUES (?, ?)",
-        user_input["customer_id"], user_input["created_by"]
-    )
-
-    # Get the sorder_header just created to use its order_num
-    sorder_header = db.execute(
-        "SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
-    )
-
-    # Keep track of total_net_value to update it in sorder_header
-    total_net_value = 0
-    # Iterate over all the available rows in the quote 
-    for i in range(len(quote_body)):
-        # Calculate net price and update total_net_value through all the iteration
-        net_price = quote_body[i]["list_price"] * (1 - quote_body[i]["discount"])
-        total_net_value = total_net_value + (net_price * quote_body[i]["quantity"])
-        # Insert all requested items as rows in sorder_body.
-        db.execute(
-            "INSERT INTO sorder_body (order_num, line_ref, item_id, quantity, net_price, delivery_date, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            sorder_header[0]["order_num"], quote_body[i]["line_ref"], quote_body[i]["item_id"], quote_body[i]["quantity"], net_price, 
-            user_input["delivery_date"], quote_body[i]["quote_num"]
-        )
-        # Change status of every item in quote_body to sold
-        db.execute(
-            "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND line_ref = ?",
-            "SOLD", quote_body[i]["quote_num"], quote_body[i]["item_id"], quote_body[i]["line_ref"]
-        )
-        # Get the current status of stock for the item
-        stock_row = db.execute( 
-            "SELECT * FROM stock WHERE item_id = ?", quote_body[i]["item_id"]
-        )
-        # Calculate the new stock values for the columns affected
-        new_stock_onsale = stock_row[0]["stock_onsale"] + quote_body[i]["quantity"]
-        new_stock_available = stock_row[0]["stock_available"] - quote_body[i]["quantity"]
-        # Update item values in stock table (+ stock_onsale, - stock_available)
-        db.execute(
-            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
-            new_stock_onsale, new_stock_available, quote_body[i]["item_id"]
-        )
-
-    # Update sorder_header with the total_net_value
-    db.execute(
-        "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
-        total_net_value, sorder_header[0]["order_num"]
-    )
-     
-    # Return success message
-    return jsonify({"message": "sales order succesfully created", "order_num": sorder_header[0]["order_num"]})
-    
 
 
 # Get all sales orders
