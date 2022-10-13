@@ -394,6 +394,8 @@ def edit_quote():
     if request.method == "POST": 
         # Will validate all user input as if this was a complete new quote
         data = request.form.get("data")
+        if not data:
+            return render_template("error.html", message="Not getting data")
         quote_lines = json.loads(data)
         # Check the user has provided a valid customer_id:
         customer = db.execute(
@@ -418,32 +420,39 @@ def edit_quote():
             if not quote_lines[i+1]["list_price"] or float(quote_lines[i+1]["list_price"]) <= 0:
                 message = "Invalid price in line " + str(i+1)
                 return render_template("error.html", message=message)
-        # Validate quote_header info
+        # Validate quote_header info (reject edition for completely SOLD quotes)
         header = db.execute(
-            "SELECT * FROM quote_header WHERE quote_num = ? AND company_name = ? AND customer_id = ?",
-            request.form.get("quote_num"), request.form.get("company_name"), request.form.get("customer_id")
+            "SELECT * FROM quote_header WHERE quote_num = ? AND company_name = ? AND customer_id = ? AND status != ?",
+            request.form.get("quote_num"), request.form.get("company_name"), request.form.get("customer_id"), "SOLD"
         )
         if not header:
             return render_template("error.html", message="Unauthorized modification")
-        # Remove all original lines from quote_body
+        # Remove all original lines from quote_body except the ones already SOLD
         db.execute(
-            "DELETE FROM quote_body WHERE quote_num = ?", request.form.get("quote_num")
+            "DELETE FROM quote_body WHERE quote_num = ? AND status != ?", 
+            request.form.get("quote_num"), "SOLD"
         )
         # Loop through all lines of quote_lines and insert them into quote_body table
-        total_net_value = 0
         for i in range((len(quote_lines))-1):
+            if quote_lines[i+1]["status"] == "SOLD":
+                continue
             net_price = round(float(quote_lines[i+1]["list_price"]) * (1 - float(quote_lines[i+1]["discount"])), 2)
             line_net_total = net_price *  int(quote_lines[i+1]["quantity"])
-            total_net_value = total_net_value + line_net_total
             db.execute(
                 "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 request.form.get("quote_num"), quote_lines[i+1]["line"], int(quote_lines[i+1]["item"]), quote_lines[i+1]["description"], int(quote_lines[i+1]["quantity"]), 
                 float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"]
             )
-        # Update quote_header line_net_total and user
+        
+        # Update sorder_header total_net_value
+        full_net_total = db.execute(
+            "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?",
+            request.form.get("quote_num")
+        )
+        # Update quote_header total_net_value and user
         db.execute(
             "UPDATE quote_header SET total_net_value = ?, created_by = ? WHERE quote_num = ?",
-            total_net_value, session["username"], request.form.get("quote_num")
+            full_net_total[0]["SUM(line_net_total)"], session["username"], request.form.get("quote_num")
         )
 
         # Send the user to the detail of the current quote

@@ -147,22 +147,20 @@
         for (let i = 0; i < rows.length; i++){
             rowIndex = i + 1;
             rowIndex = rowIndex.toString().padStart(2, "0");
-            console.log(rowIndex);
             let statusRowId = "line_" + rowIndex;
             if (statuses[i+1].value == "SOLD"){
                 currentRow = document.getElementById(statusRowId);
-                console.log(currentRow);
                 allTd = currentRow.children;
                 for (let j = 0; j < allTd.length; j++){
                     everyInput = allTd[j].firstElementChild;
                     everyInput.setAttribute("disabled", "");
                     if (j == ((allTd.length) -1) ){
-                        console.log("llegamos");
                         allTd[j].removeAttribute("onclick");
-                    }
+                    };
                 };
             };
-        }
+        };
+
         
     </script>
     <script src="static/source.js"></script>

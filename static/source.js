@@ -262,10 +262,8 @@ function gatherData(){
     netPrices = document.getElementsByClassName("net_price");
     totals = document.getElementsByClassName("total");
     leadTimes = document.getElementsByClassName("lead_time");
+    statusList = document.getElementsByClassName("status");
     rowFullList = [];
-    for (let i = 0; i < lines.length; i++){
-        console.log(quantities[i].value);
-    }
     for (let i = 0; i < lines.length; i++){
     rowLine = {};
     rowLine["line"] = lines[i].value;
@@ -277,9 +275,9 @@ function gatherData(){
     rowLine["net_price"] = netPrices[i].value;
     rowLine["total"] = totals[i].value;
     rowLine["lead_time"] = leadTimes[i].value;
+    rowLine["status"] = statusList[i].value;
     rowFullList[i] = rowLine;
     };
-    console.log(rowFullList);
     // Get text area element
     dataElement = document.getElementById('data');
     data = "[";
@@ -291,6 +289,8 @@ function gatherData(){
     data = data + "]";
     dataElement.innerHTML = data;
 };
+
+
 
 function gatherDataSorder(){
     lines = document.getElementsByClassName("line");
