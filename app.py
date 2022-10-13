@@ -450,8 +450,7 @@ def edit_quote():
         session["temp_variable"] = request.form.get("quote_num")
         return redirect("/quote_details")
 
-
-    # if methods = "GET"
+    # On GET method, return edit_quote page with all information preloaded
     header = db.execute(
         "SELECT * FROM quote_header WHERE quote_num = ?", request.args.get("quote_num")
     )
