@@ -7,7 +7,7 @@
 {% block body %}
 
     <div id="title" class="h2 text-center">Create Sales Order</div>
-    <form action="/" method="get" onsubmit="gatherData()">
+    <form action="/convert_quote_to_sorder" method="post" onsubmit="gatherDataSorder()">
         <div>
             <label style="width: 110px;" for="creation_date">Date:</label>
             <input id="current_date" type="date" style="width: 110px;" disabled>
@@ -35,40 +35,43 @@
                         <td style="width: 6%">Discount</td>
                         <td style="width: 6%">Net Price</td>
                         <td style="width: 7%">Total</td>
+                        <td hidden>Lead Time</td>
                         <td style="width: 9%">Delivery Date</td>
-                        <td style="width: 5%">Quote</td>
                         <td style="width: 7%">PO</td>
+                        <td style="width: 5%">Quote</td>
                         <td style="min-width: 4%"></td>
                     </tr>
                     <tr id="template_row" hidden>
-                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text"></td>
-                        <td id="item_" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" disabled></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="delivery_date[]" class="delivery_date" style="width: 100%;" type="date"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="quote_num[]" class="quote_num" style="width: 100%;" type="text" value=""></td>
-                        <td style="padding: 0.5px; margin: 1px"><input name="po_num[]" class="po_num" style="width: 100%;" type="text" value=""></td>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text"></td>
+                        <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value=""></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value=""></td>
                         <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                     </tr>
                 </thead>
                 <tbody id="quote_lines">
                     {% for body in bodies %}
                         <tr id="line_01">
-                            <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
-                            <td id="item_01" style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="list_price[]" class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="discount[]" class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discounts']) }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discounts'])) }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="delivery_date]" class="delivery_date" style="width: 100%;" type="date" required></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="quote_num[]" input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
-                            <td style="padding: 0.5px; margin: 1px"><input name="po_num[]" input class="po_num" style="width: 100%;" type="text"></td>
+                            <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
+                            <td id="item_01" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discount']) }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discount'])) }}" disabled></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
+                            <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="{{ body['lead_time'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" required></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
                             <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                         </tr>
                     {% endfor %}
@@ -115,15 +118,15 @@
             onInputValue = "getItem('" + itemId + "')";
             itemInput.setAttribute('oninput', onInputValue);
             quantityInput = columns[3].firstElementChild;
-            onChangeValue = "CalculateTotal('" + rowId + "')";
+            onChangeValue = "calculateTotal('" + rowId + "')";
             quantityInput.setAttribute('onchange', onChangeValue);
             listPriceInput = columns[4].firstElementChild;
-            onChangeValue = "CalculateNetPriceAndTotal('" + rowId + "')";
+            onChangeValue = "calculateNetPriceAndTotal('" + rowId + "')";
             listPriceInput.setAttribute('onchange', onChangeValue);
             discountInput = columns[5].firstElementChild;
             discountInput.setAttribute('onchange', onChangeValue);
             onClickValue = "removeLine('" + rowId + "')";
-            columns[11].setAttribute('onclick', onClickValue);
+            columns[12].setAttribute('onclick', onClickValue);
         };
 
         // This section will update grand totals on page onload.

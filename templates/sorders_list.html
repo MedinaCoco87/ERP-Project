@@ -27,8 +27,8 @@
                     <td>{{ sorder["order_num"] }}</td>
                     <td>{{ sorder["date"] }}</td>
                     <td>{{ sorder["customer_id"] }}</td>
-                    <td>Company Name</td>
-                    <td>{{ sorder["total_net_value"] }}</td>
+                    <td>{{ sorder["company_name"] }}</td>
+                    <td>{{ "%.2f"|format(sorder["total_net_value"]) }}</td>
                     <td>{{ sorder["status"] }}</td>
                     <td>{{ sorder["created_by"] }}</td>
                     <td>    

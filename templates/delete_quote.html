@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Quote Details
+    Delete Quote
 {% endblock %}
 
 
     
 {% block body %}
-<div id="title" class="h2 text-center">Quote Details</div>
-<form action="/edit_quote" method="get">
+<div id="title" class="h2 text-center">Delete Quote</div>
+<form action="/delete_quote" method="post">
     <div>
         <label style="width: 110px;" for="creation_date">Creation Date:</label>
         <input id="creation_date" type="date" style="width: 110px;" value="{{ header[0]['date'] }}" disabled>
@@ -20,7 +20,7 @@
     </div>
     <div class="flex-container" style="margin-bottom: 5px;">
         <label style="width: 110px;" for="customer_id">Customer ID:</label>
-        <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="width: 110px;" value="{{ header[0]['customer_id'] }}" disabled>
+        <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="width: 110px;" value="{{ header[0]['customer_id'] }}" readonly>
         <label style="width: 120px;" for="company_name">Company Name:</label>
         <input style="width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" disabled>
     </div>
@@ -61,23 +61,15 @@
     </div>
     <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
         <label for="total_net_value">Total Net Value</label>
-        <input type="text" name="total_net_value" id="total_net_value" value="{{ '%.2f'|format(header[0]['total_net_value']) }}" disabled>
+        <input type="text" name="total_net_value" id="total_net_value" value="{{ '%.2f'|format(header[0]['total_net_value']) }}" readonly>
         <label for="tax_amount">Tax Amount</label>
         <input type="text" id="tax_amount" value="{{ '%.2f'|format(header[0]['total_net_value'] * 0.18) }}" disabled>
         <label for="total_tax_included">Total Tax Included</label>
         <input type="text" name="total_tax_included" id="total_tax_included" value="{{ '%.2f'|format(header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18)) }}" disabled>
     </div>
-    <div style="padding: 3px">
-        <button class="btn btn-outline-danger" type="submit">Edit</button>
+    <div style="display: flex; justify-content: flex-end; margin: 10px;">
+        <button class="btn btn-dark" type="submit">Delete</button>
     </div>
-</form>
-<form method="get" action="/convert_quote_to_sorder" style="padding: 3px">
-    <input type="text" name="quote_num" value="{{ header[0]['quote_num'] }}" hidden>
-    <button class="btn btn-danger" type="submit">Convert</button>
-</form>
-<form method="get" action="/delete_quote" style="padding: 3px;">
-    <input type="text" name="quote_num" value="{{ header[0]['quote_num'] }}" hidden>
-    <button class="btn btn-dark" type="submit">Delete</button>
 </form>
 <form method="get" action="/get_quotes_list" style="padding: 3px">
     <button class="btn btn-warning" type="submit">Back to Quotes</button>

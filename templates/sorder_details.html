@@ -5,63 +5,102 @@
 {% endblock %}
 
 {% block body %}
-    <h2 class="text-center">Sales Order Details</h2>
-    <div>
-        <div class="h6">Date: {{ header[0]["date"] }}</div>
-        <div class="h6">Order Num. {{ header[0]["order_num"] }}</div>
-    </div>
-    <div>
-        <div class="h6" style="display: inline-block; padding-right: 40px">Customer ID: {{ header[0]["customer_id"] }}</div>
-        <div class="h6" style="display: inline-block; padding-left: 40px">Company Name</div>
-    </div>
-    <table class="table text-center">
-        <thead class="table-light">
-            <tr>
-                <th>Line</th>
-                <th>Item</th>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Net Price</th>
-                <th>Net Total</th>
-                <th>Delivery Date</th>
-                <th>Status</th>
-                <th>Quote #</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for body in bodies %}
-            <tr>
-                <td>{{ body["line_ref"] }}</td>
-                <td>{{ body["item_id"] }}</td>
-                <td>Item description</td>
-                <td>{{ body["quantity"] }}</td>
-                <td>{{ body["net_price"] }}</td>
-                <td>Net total</td>
-                <td>{{ body["delivery_date"] }}</td>
-                <td>{{ body["status"] }}</td>
-                <td>{{ body["quote_num"] }}</td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>{{ header[0]["total_net_value"] }}</td>
-                <td></td>
-                <td></td>
-                <td></td>    
-        </tbody>
-    </table>
-    <form method="get" action="/" style="padding: 3px;">
+
+    <div id="title" class="h2 text-center">Sales Order Details</div>
+    <form action="/edit_sorder" method="get">
+        <div>
+            <label style="width: 110px;" for="creation_date">Date:</label>
+            <input id="current_date" type="date" style="width: 110px;" value="{{ header[0]['date'] }}" disabled>
+        </div>
+        <div>
+            <label style="width: 110px;" for="quote_id">Sorder No:</label>
+            <input type="text" name="order_num" id="order_num" style="width: 110px;" value="{{ header[0]['order_num'] }}" readonly>
+        </div>
+        <div class="flex-container" style="margin-bottom: 5px;">
+            <label style="width: 110px;" for="customer_id">Customer ID:</label>
+            <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="width: 110px;" value="{{ header[0]['customer_id'] }}" disabled>
+            <label style="width: 120px;" for="company_name">Company Name:</label>
+            <input style="width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" disabled>
+        </div>
+        <!-- This one below is the div of the table-->
+        <div>
+            <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
+                <thead class="table-primary text-center" style="width: 100%">
+                    <tr style="width: 100%">
+                        <td style="width: 3%">Line</td>
+                        <td style="width: 6%">Item</td>
+                        <td style="width: 36%">Description</td>
+                        <td style="width: 4%">Q</td>
+                        <td style="width: 6%">Net Price</td>
+                        <td style="width: 7%">Total</td>
+                        <td hidden>Lead Time</td>
+                        <td style="width: 9%">Delivery Date</td>
+                        <td style="width: 9%">Status</td>
+                        <td style="width: 7%">PO</td>
+                        <td style="width: 5%">Quote</td>
+                    </tr>
+                    <tr id="template_row" hidden>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" disabled></td>
+                        <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quantity" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled></td>
+                        <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" value="0" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" disabled></td>
+                    </tr>
+                </thead>
+                <tbody id="quote_lines">
+                    {% for body in bodies %}
+                    <tr id="line_01">
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}" disabled></td>
+                        <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" style="width: 100%;" type="text" value="{{ body['item_id'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" value="{{ body['item_desc'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quantity" style="width: 100%;" type="text" value="{{ body['quantity'] }}"disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['net_price']) }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['line_net_total']) }}" disabled></td>
+                        <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" value="0" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" value="{{ body['delivery_date'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="{{ body['po_number'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" disabled></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <button type="button" onclick="newLine()" class="btn btn-success btn-sm" hidden>New Line</button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+            <label for="total_net_value">Total Net Value</label>
+            <input type="text" name="total_net_value" id="total_net_value" value="{{ '%.2f'|format(header[0]['total_net_value']) }}" disabled>
+            <label for="tax_amount">Tax Amount</label>
+            <input type="text" id="tax_amount" value="{{ '%.2f'|format(header[0]['total_net_value'] * 0.18) }}" disabled>
+            <label for="total_tax_included">Total Tax Included</label>
+            <input type="text" name="total_tax_included" id="total_tax_included" value="{{ '%.2f'|format(header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18)) }}" disabled>
+        </div>
+        <div>
+            <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin: 10px;">
+            <button type="submit">Edit</button>
+            <!-- Add class="btn btn-outline-danger" when route fully implemented-->
+        </div>
+    </form>
+    <form method="get" action="/sorder_to_delivery" style="padding: 3px">
+        <input type="text" name="order_num" value="{{ header[0]['order_num'] }}" hidden>
         <button type="submit">Delivery</button>
         <!-- Add class="btn btn-danger" when route fully implemented-->
     </form>
-    <form method="get" action="/get_all_sorders" style="padding: 3px;">
+    <form method="get" action="/get_all_sorders" style="padding: 3px">
         <button class="btn btn-warning" type="submit">Back to Orders</button>
     </form>
-    <form method="get" action="/" style="padding: 3px;">
+    <form method="get" action="/" style="padding: 3px">
         <button class="btn btn-secondary" type="submit">Home</button>
     </form>
+    <script src="static/source.js"></script>
 {% endblock %}
