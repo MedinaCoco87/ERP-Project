@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sales Order
+{% endblock %}
+
+{% block body %}
+
+    <div id="title" class="h2 text-center">Edit Sales Order</div>
+    <form action="/edit_sorder" method="post" onsubmit="gatherDataSorder()">
+        <div>
+            <label style="width: 110px;" for="creation_date">Date:</label>
+            <input id="current_date" type="date" style="width: 110px;" disabled>
+        </div>
+        <div>
+            <label style="width: 110px;" for="quote_id">Sorder No:</label>
+            <input type="text" name="order_num" id="order_num" style="width: 110px;" value="{{ header[0]['order_num'] }}" readonly>
+        </div>
+        <div class="flex-container" style="margin-bottom: 5px;">
+            <label style="width: 110px;" for="customer_id">Customer ID:</label>
+            <input type="text" id="customer_id" name="customer_id" placeholder="Customer No." style="width: 110px;" value="{{ header[0]['customer_id'] }}" readonly>
+            <label style="width: 120px;" for="company_name">Company Name:</label>
+            <input style="width: 200px;" type="text" id="company_name" name="company_name" placeholder="Company Name" value="{{ header[0]['company_name'] }}" readonly>
+        </div>
+        <!-- This one below is the div of the table-->
+        <div>
+            <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
+                <thead class="table-primary text-center" style="width: 100%">
+                    <tr style="width: 100%">
+                        <td style="width: 3%">Line</td>
+                        <td style="width: 6%">Item</td>
+                        <td style="width: 35%">Description</td>
+                        <td style="width: 4%">Q</td>
+                        <td style="width: 5%">Price</td>
+                        <td style="width: 6%">Discount</td>
+                        <td style="width: 5%">Net</td>
+                        <td style="width: 7%">Total</td>
+                        <td hidden>Lead Time</td>
+                        <td style="width: 8%">Due Date</td>
+                        <td style="width: 5%">PO</td>
+                        <td style="width: 6%">Status</td>
+                        <td style="width: 5%">Quote</td>
+                        <td style="width: 5%"></td>
+                    </tr>
+                    <tr id="template_row" hidden>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text"></td>
+                        <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text"></td>
+                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 80%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                    </tr>
+                </thead>
+                <tbody id="quote_lines">
+                    {% for body in bodies %}
+                        <tr id="line_01">
+                            <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
+                            <td id="item_01" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text" value="{{ body['item_id'] }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly value="{{ body['item_desc'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="{{ body['quantity'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price']) }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['discount']) }}" readonly></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discount'])) }}" disabled></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
+                            <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="{{ body['lead_time'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" value="{{ body['delivery_date'] }}" required></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="{{ body['po_number'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
+                            <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <button type="button" onclick="newLine()" class="btn btn-success btn-sm" hidden>New Line</button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+            <label for="total_net_value">Total Net Value</label>
+            <input type="text" name="total_net_value" id="total_net_value" disabled>
+            <label for="tax_amount">Tax Amount</label>
+            <input type="text" id="tax_amount" disabled>
+            <label for="total_tax_included">Total Tax Included</label>
+            <input type="text" name="total_tax_included" id="total_tax_included" disabled>
+        </div>
+        <div>
+            <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin: 10px;">
+            <button class="btn btn-danger" type="submit">Register</button>
+        </div>
+    </form>
+    <form method="get" action="/get_all_sorders" style="padding: 3px">
+        <button class="btn btn-warning" type="submit">Back to Orders</button>
+    </form>
+    <form method="get" action="/" style="padding: 3px">
+        <button class="btn btn-secondary" type="submit">Home</button>
+    </form>
+
+    <script>
+        // Corrects all id's and in-function line_references
+        tbody = document.querySelector('tbody');
+        rows = tbody.children;
+        for (let i = 0; i < (rows.length) - 1; i++){
+            index = i + 2;
+            index = index.toString().padStart(2, "0");
+            rowId = "line_" + index;
+            rows[i+1].id = rowId;
+            columns = rows[i+1].children;
+            itemId = "item_" + index;
+            columns[1].id = itemId;
+            itemInput = columns[1].firstElementChild;
+            onInputValue = "getItem('" + itemId + "')";
+            itemInput.setAttribute('oninput', onInputValue);
+            quantityInput = columns[3].firstElementChild;
+            onChangeValue = "calculateTotal('" + rowId + "')";
+            quantityInput.setAttribute('onchange', onChangeValue);
+            listPriceInput = columns[4].firstElementChild;
+            onChangeValue = "calculateNetPriceAndTotal('" + rowId + "')";
+            listPriceInput.setAttribute('onchange', onChangeValue);
+            discountInput = columns[5].firstElementChild;
+            discountInput.setAttribute('onchange', onChangeValue);
+            onClickValue = "removeLine('" + rowId + "')";
+            columns[13].setAttribute('onclick', onClickValue);
+        };
+
+        // This section will update grand totals on page onload.
+        let totals = document.getElementsByClassName('total');
+        // Get the total net value
+        let totalNetValue = 0;
+        for(let i = 0; i < totals.length; i++){
+            totalNetValue += parseFloat(totals[i].value);
+        }
+        // Get the total tax amount
+        let taxAmount = Math.round(((totalNetValue * 0.18) + Number.EPSILON) * 100) / 100; // hard coded
+        // Get the total tax included
+        let totalTaxIncluded = totalNetValue + taxAmount;
+        // Update all the values in the respective elements
+        let totalNetValueElement = document.getElementById('total_net_value');
+        totalNetValueElement.setAttribute('value', totalNetValue);
+        let TaxAmountElement = document.getElementById('tax_amount');
+        TaxAmountElement.setAttribute('value', taxAmount);
+        let totalTaxIncludedElement = document.getElementById('total_tax_included');
+        totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
+    </script>
+    <script src="static/source.js"></script>
+{% endblock %}

@@ -331,6 +331,8 @@ def create_quote():
     if request.method == "POST":
         # Get the quote_lines from the frontend form
         data = request.form.get("data")
+        if not data:
+            return render_template("error.html", message="There was an unexpected error. Contact your admin")
         # Format the string into json
         quote_lines = json.loads(data)
         # Check the user has provided a valid customer_id:
@@ -395,7 +397,7 @@ def edit_quote():
         # Will validate all user input as if this was a complete new quote
         data = request.form.get("data")
         if not data:
-            return render_template("error.html", message="Not getting data")
+            return render_template("error.html", message="There was an unexpected error. Contact your admin")
         quote_lines = json.loads(data)
         # Check the user has provided a valid customer_id:
         customer = db.execute(
@@ -444,7 +446,7 @@ def edit_quote():
                 float(quote_lines[i+1]["list_price"]), float(quote_lines[i+1]["discount"]), net_price, line_net_total, quote_lines[i+1]["lead_time"], quote_lines[i+1]["status"]
             )
         
-        # Update sorder_header total_net_value
+        # Update quote_header total_net_value
         full_net_total = db.execute(
             "SELECT SUM(line_net_total) FROM quote_body WHERE quote_num = ?",
             request.form.get("quote_num")
@@ -562,179 +564,214 @@ def convert_quote_to_sorder():
         )
         return render_template("create_sorder.html", header=header, bodies=bodies)
     
-    # Get the data provided by user
-    data = request.form.get("data")
-    sorder_lines = json.loads(data)
+    if request.method == "POST":
 
-    # Check there is a quote_header row that matches both customer_id and quote_num
-    quote_header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
-        int(sorder_lines[1]["quote_num"]), request.form.get("customer_id"))
-    if not quote_header:
-        return render_template("error.html", message="invalid quote number or customer id")
-    
-    # Checks item_id, pending quantity and lead_time(hidden from user) are valid for all sorder_lines
-    # Multiple quotes to one sorder not allowed in this version of the program.
-    for i in range((len(sorder_lines)) - 1):
-        quote_lines = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND lead_time = ? AND status = ?",
-            int(sorder_lines[1]["quote_num"]), int(sorder_lines[i + 1]["item"]), float(sorder_lines[i + 1]["net_price"]), 
-            sorder_lines[i + 1]["lead_time"], "PENDING"
-        )
-        if not quote_lines:
-            message = "No pending line that matches your request for item " + str(sorder_lines[i + 1]["item"]) + "." 
-            return render_template("error.html", message=message)
-        # Making sure the program considers all lines that matches the query
-        # Hacer que si llega al final del loop y no encuentra una linea con la cantidad...
-        # ... suficiente, que arroje el error, pero no antes.
-        for j in range(len(quote_lines)):
-            if int(quote_lines[j]["quantity"]) >= int(sorder_lines[i + 1]["quantity"]):
-                break
-            if j == (len(quote_lines) - 1):
-                message = "No quote line with enough pending quantity for item " + str(sorder_lines[i + 1]["item"]) + "."
-                return render_template("error.html", message=message)
+        # Get the data provided by user
+        data = request.form.get("data")
+        if not data:
+            return render_template("error.html", message="There was an unexpected error. Contact your admin")
+        sorder_lines = json.loads(data)
 
+        # Check there is a quote_header row that matches both customer_id and quote_num
+        quote_header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ?",
+            int(sorder_lines[1]["quote_num"]), request.form.get("customer_id"))
+        if not quote_header:
+            return render_template("error.html", message="invalid quote number or customer id")
         
-    # Create sorder_header
-    db.execute(
-        "INSERT INTO sorder_header (customer_id, company_name, created_by) VALUES (?, ?, ?)", 
-        int(request.form.get("customer_id")), request.form.get("company_name"), session["username"]
-    )
-    # Get the sorder_header just created to use the order_num in the sorder_body
-    sorder_header = db.execute(
-        "SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
-    )
-    if not sorder_header:
-        return render_template("error.html", message="Fatal error while creating sorder_header")
-    
-    # Create the sorder_body and update stock table
-    for i in range(len(sorder_lines)- 1):
-        net_price = float(sorder_lines[i + 1]["list_price"]) * (1 - float(sorder_lines[i + 1]["discount"]))
-        line_net_total = net_price * int(sorder_lines[i + 1]["quantity"])
+        # Checks item_id, pending quantity and lead_time(hidden from user) are valid for all sorder_lines
+        # Multiple quotes to one sorder not allowed in this version of the program.
+        for i in range((len(sorder_lines)) - 1):
+            quote_lines = db.execute(
+                "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND lead_time = ? AND status = ?",
+                int(sorder_lines[1]["quote_num"]), int(sorder_lines[i + 1]["item"]), float(sorder_lines[i + 1]["net_price"]), 
+                sorder_lines[i + 1]["lead_time"], "PENDING"
+            )
+            if not quote_lines:
+                message = "No pending line that matches your request for item " + str(sorder_lines[i + 1]["item"]) + "." 
+                return render_template("error.html", message=message)
+            # Making sure the program considers all lines that matches the query
+            # Hacer que si llega al final del loop y no encuentra una linea con la cantidad...
+            # ... suficiente, que arroje el error, pero no antes.
+            for j in range(len(quote_lines)):
+                if int(quote_lines[j]["quantity"]) >= int(sorder_lines[i + 1]["quantity"]):
+                    break
+                if j == (len(quote_lines) - 1):
+                    message = "No quote line with enough pending quantity for item " + str(sorder_lines[i + 1]["item"]) + "."
+                    return render_template("error.html", message=message)
+
+            
+        # Create sorder_header
         db.execute(
-            "INSERT INTO sorder_body (order_num, line_ref, item_id, item_desc, quantity, net_price, line_net_total, delivery_date, status, po_number, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            sorder_header[0]["order_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"],
-            sorder_lines[i + 1]["description"], sorder_lines[i + 1]["quantity"], net_price, line_net_total,
-            sorder_lines[i + 1]["delivery_date"], "PENDING", sorder_lines[i + 1]["po_num"], sorder_lines[i + 1]["quote_num"]
+            "INSERT INTO sorder_header (customer_id, company_name, created_by) VALUES (?, ?, ?)", 
+            int(request.form.get("customer_id")), request.form.get("company_name"), session["username"]
         )
-        item_stocks = db.execute(
-            "SELECT * FROM stock WHERE item_id = ?", sorder_lines[i + 1]["item"]
+        # Get the sorder_header just created to use the order_num in the sorder_body
+        sorder_header = db.execute(
+            "SELECT * FROM sorder_header ORDER BY order_num DESC LIMIT 1"
         )
-        new_onsale = item_stocks[0]["stock_onsale"] + int(sorder_lines[i + 1]["quantity"])
-        new_available = item_stocks[0]["stock_available"] - int(sorder_lines[i + 1]["quantity"])
+        if not sorder_header:
+            return render_template("error.html", message="Fatal error while creating sorder_header")
+        
+        # Create the sorder_body and update stock table
+        for i in range(len(sorder_lines)- 1):
+            net_price = float(sorder_lines[i + 1]["list_price"]) * (1 - float(sorder_lines[i + 1]["discount"]))
+            line_net_total = net_price * int(sorder_lines[i + 1]["quantity"])
+            db.execute(
+                "INSERT INTO sorder_body (order_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time, delivery_date, status, po_number, quote_num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                int(sorder_header[0]["order_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]),
+                sorder_lines[i + 1]["description"], int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["list_price"]), 
+                float(sorder_lines[i + 1]["discount"]), net_price, line_net_total, int(sorder_lines[i + 1]["lead_time"]), 
+                sorder_lines[i + 1]["delivery_date"], "PENDING", sorder_lines[i + 1]["po_num"], int(sorder_lines[i + 1]["quote_num"])
+            )
+            item_stocks = db.execute(
+                "SELECT * FROM stock WHERE item_id = ?", int(sorder_lines[i + 1]["item"])
+            )
+            new_onsale = item_stocks[0]["stock_onsale"] + int(sorder_lines[i + 1]["quantity"])
+            new_available = item_stocks[0]["stock_available"] - int(sorder_lines[i + 1]["quantity"])
+            db.execute(
+                "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
+                new_onsale, new_available, int(sorder_lines[i + 1]["item"])
+            )
+
+        # Update sorder_header total_net_value
+        full_net_total = db.execute(
+            "SELECT SUM(line_net_total) FROM sorder_body WHERE order_num = ?",
+            sorder_header[0]["order_num"]
+        )
         db.execute(
-            "UPDATE stock SET stock_onsale = ?, stock_available = ? WHERE item_id = ?",
-            new_onsale, new_available, sorder_lines[i + 1]["item"]
+            "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
+            full_net_total[0]["SUM(line_net_total)"], sorder_header[0]["order_num"]
         )
 
-    # Update sorder_header total_net_value
-    full_net_total = db.execute(
-        "SELECT SUM(line_net_total) FROM sorder_body WHERE order_num = ?",
-        sorder_header[0]["order_num"]
-    )
-    db.execute(
-        "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
-        full_net_total[0]["SUM(line_net_total)"], sorder_header[0]["order_num"]
-    )
-
-    # Update status of quote_body lines involved to "sold"
-    for i in range(len(sorder_lines)- 1):
-        perfect_match = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND status = ? AND lead_time = ?",
-            sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
-            sorder_lines[i + 1]["quantity"], sorder_lines[i + 1]["net_price"], "PENDING",
-            sorder_lines[i + 1]["lead_time"]
-        )
-        # if there is a perfect match, just update the first line and go to next iteration
-        if perfect_match:
-            db.execute(
-                "UPDATE quote_body SET status = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
-                "SOLD", sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
-                sorder_lines[i + 1]["quantity"], sorder_lines[i + 1]["net_price"], "PENDING",
-                sorder_lines[i + 1]["lead_time"]
+        # Update status of quote_body lines involved to "sold"
+        for i in range(len(sorder_lines)- 1):
+            perfect_match = db.execute(
+                "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND status = ? AND lead_time = ?",
+                int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]), 
+                int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["net_price"]), "PENDING",
+                int(sorder_lines[i + 1]["lead_time"])
             )
-            continue
-        # If there is not a perfect match, get a line with a bigger quantity. 
-        # Update the first line and add a new line for pending quantity
-        second_best = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
-            sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
-            sorder_lines[i + 1]["net_price"], "PENDING", sorder_lines[i + 1]["lead_time"]
-        )
-        if second_best:
-            net_total_sold = round(int(sorder_lines[i + 1]["quantity"]) * float(sorder_lines[i + 1]["net_price"]), 2)
-            db.execute(
-                "UPDATE quote_body SET status = ?, quantity = ?, line_net_total = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
-                "SOLD", int(sorder_lines[i + 1]["quantity"]), net_total_sold, sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], 
-                sorder_lines[i + 1]["item"], sorder_lines[i + 1]["net_price"], "PENDING", sorder_lines[i + 1]["lead_time"]
-            )
-            remaining_quantity = second_best[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
-            net_total_pending = round(remaining_quantity * second_best[0]["net_price"], 2)
-            db.execute(
-                "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                int(second_best[0]["quote_num"]), int(second_best[0]["line_ref"]), int(second_best[0]["item_id"]), 
-                second_best[0]["item_desc"], remaining_quantity, float(second_best[0]["list_price"]), float(second_best[0]["discount"]),
-                float(second_best[0]["net_price"]), net_total_pending, second_best[0]["lead_time"]
-            )
-            continue
-        # Try a last search with no quantity and no line_ref
-        else:
-            last_try = db.execute(
-                "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
-                sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["item"], 
-                sorder_lines[i + 1], sorder_lines[i + 1]["net_price"], "PENDING",
-                sorder_lines[i + 1]["lead_time"]
-            )
-            if last_try:
+            # if there is a perfect match, just update the first line and go to next iteration
+            if perfect_match:
                 db.execute(
-                    "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
-                    "SOLD", sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
-                    sorder_lines[i + 1]["net_price"], "PENDING", sorder_lines[i + 1]["lead_time"]
+                    "UPDATE quote_body SET status = ?, sorder_num = ?  WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
+                    "SOLD", sorder_header[0]["order_num"], int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]), 
+                    int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["net_price"]), "PENDING", 
+                    int(sorder_lines[i + 1]["lead_time"])
                 )
-                remaining_quantity = last_try[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
-                line_net_total = remaining_quantity * last_try[0]["net_price"]
+                continue
+            # If there is not a perfect match, get a line with a bigger quantity. 
+            # Update the first line and add a new line for pending quantity
+            second_best = db.execute(
+                "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
+                int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]), 
+                float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
+            )
+            if second_best:
+                net_total_sold = round(int(sorder_lines[i + 1]["quantity"]) * float(sorder_lines[i + 1]["net_price"]), 2)
+                db.execute(
+                    "UPDATE quote_body SET status = ?, quantity = ?, line_net_total = ?, sorder_num = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
+                    "SOLD", int(sorder_lines[i + 1]["quantity"]), net_total_sold, int(sorder_header[0]["order_num"]), int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), 
+                    int(sorder_lines[i + 1]["item"]), float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
+                )
+                remaining_quantity = second_best[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
+                net_total_pending = round(remaining_quantity * second_best[0]["net_price"], 2)
                 db.execute(
                     "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    last_try[0]["quote_num"], last_try[0]["line_ref"], last_try[0]["item_id"], 
-                    last_try[0]["item_desc"], remaining_quantity, last_try[0]["list_price"], last_try[0]["discount"],
-                    last_try[0]["net_price"], line_net_total, last_try[0]["lead_time"]
+                    second_best[0]["quote_num"], second_best[0]["line_ref"], second_best[0]["item_id"], 
+                    second_best[0]["item_desc"], remaining_quantity, second_best[0]["list_price"], second_best[0]["discount"],
+                    second_best[0]["net_price"], net_total_pending, second_best[0]["lead_time"]
                 )
-    # Update status of quote header
-    # Make sure quote_body status only allows "PENDING", "SOLD", "LOST" values.
-    statuses = db.execute(
-        "SELECT DISTINCT status FROM quote_body WHERE quote_num = ?",
-        sorder_lines[1]["quote_num"]
-    )
-    if len(statuses) == 1:
-        if statuses[0]["status"] == "SOLD":
-            db.execute(
+                continue
+            # Try a last search with no quantity and no line_ref
+            else:
+                last_try = db.execute(
+                    "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
+                    int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["item"]), 
+                    float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
+                )
+                if last_try:
+                    db.execute(
+                        "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND sorder_num = ? AND lead_time = ? LIMIT 1",
+                        "SOLD", sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
+                        sorder_lines[i + 1]["net_price"], "PENDING", sorder_header[0]["order_num"], sorder_lines[i + 1]["lead_time"]
+                    )
+                    remaining_quantity = last_try[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
+                    line_net_total = remaining_quantity * last_try[0]["net_price"]
+                    db.execute(
+                        "INSERT INTO quote_body (quote_num, line_ref, item_id, item_desc, quantity, list_price, discount, net_price, line_net_total, lead_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        last_try[0]["quote_num"], last_try[0]["line_ref"], last_try[0]["item_id"], 
+                        last_try[0]["item_desc"], remaining_quantity, last_try[0]["list_price"], last_try[0]["discount"],
+                        last_try[0]["net_price"], line_net_total, last_try[0]["lead_time"]
+                    )
+        # Update status of quote header
+        # Make sure quote_body status only allows "PENDING", "SOLD", "LOST" values.
+        statuses = db.execute(
+            "SELECT DISTINCT status FROM quote_body WHERE quote_num = ?",
+            sorder_lines[1]["quote_num"]
+        )
+        if len(statuses) == 1:
+            if statuses[0]["status"] == "SOLD":
+                db.execute(
+                    "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                    "SOLD", sorder_lines[1]["quote_num"]
+                )
+            elif statuses[0]["status"] == "LOST":
+                db.execute(
+                    "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                    "LOST", sorder_lines[1]["quote_num"]
+                )
+        elif len(statuses) == 2:
+            if statuses[0]["status"] != "PENDING" and statuses[1]["status"] != "PENDING":
+                db.execute(
+                    "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                    "PARTIAL CLOSED", sorder_lines[1]["quote_num"]
+                )
+            else:
+                db.execute(
                 "UPDATE quote_header SET status = ? WHERE quote_num = ?",
-                "SOLD", sorder_lines[1]["quote_num"]
-            )
-        elif statuses[0]["status"] == "LOST":
-            db.execute(
-                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
-                "LOST", sorder_lines[1]["quote_num"]
-            )
-    elif len(statuses) == 2:
-        if statuses[0]["status"] != "PENDING" and statuses[1]["status"] != "PENDING":
-             db.execute(
-                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
-                "PARTIAL CLOSED", sorder_lines[1]["quote_num"]
+                "PARTIAL OPEN", sorder_lines[1]["quote_num"]
             )
         else:
             db.execute(
-            "UPDATE quote_header SET status = ? WHERE quote_num = ?",
-            "PARTIAL OPEN", sorder_lines[1]["quote_num"]
-        )
-    else:
-        db.execute(
-            "UPDATE quote_header SET status = ? WHERE quote_num = ?",
-            "PARTIAL OPEN", sorder_lines[1]["quote_num"]
-        )
+                "UPDATE quote_header SET status = ? WHERE quote_num = ?",
+                "PARTIAL OPEN", sorder_lines[1]["quote_num"]
+            )
 
-    return redirect("/get_all_sorders")
+        return redirect("/get_all_sorders")
 
+
+
+@app.route("/edit_sorder", methods=["GET", "POST"])
+def edit_sorder():
+    if request.method == "POST":
+        # Get the data provided by user
+        data = request.form.get("data")
+        if not data:
+            return render_template("error.html", message="There was an unexpected error. Contact your admin")
+        sorder_lines = json.loads(data)
+
+        # Check there's a quote_header row that matches customer_id/quote_num, and status not SOLD
+        quote_header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ? AND status != ?",
+            int(sorder_lines[1]["quote_num"]), request.form.get("customer_id")
+        )
+        if not quote_header:
+            return render_template("error.html", message="Invalid customer id or quote number")
+
+    
+    
+    order_num = request.args.get("order_num")
+    if not order_num:
+        return render_template("error.html", message="Unexpected error. Contact your admin")
+    header = db.execute(
+        "SELECT * FROM sorder_header WHERE order_num = ?", order_num
+    )
+    bodies = db.execute (
+        "SELECT * FROM sorder_body WHERE order_num = ?", order_num
+    )
+    return render_template("edit_sorder.html", header=header, bodies=bodies)
 
 # Get all sales orders
 @app.route("/get_all_sorders", methods = ["GET"])

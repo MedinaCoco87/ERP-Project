@@ -355,10 +355,32 @@ CREATE TABLE quote_body (
     net_price FLOAT, 
     line_net_total FLOAT NOT NULL,
     lead_time INT NOT NULL, 
-    status TEXT NOT NULL DEFAULT PENDING, 
+    status TEXT NOT NULL DEFAULT PENDING,
+    sorder_num INTEGER,
     FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, 
     FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, 
     CHECK (quantity > 0 AND list_price >= 0 AND discounts < 1)
     );
 
-*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discount FLOAT, net_price FLOAT, line_net_total FLOAT NOT NULL, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discount < 1));
+*SQL* CREATE TABLE quote_body (quote_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT, discount FLOAT, net_price FLOAT, line_net_total FLOAT NOT NULL, lead_time INT NOT NULL, status TEXT NOT NULL DEFAULT PENDING, sorder_num INTEGER, FOREIGN KEY (quote_num) REFERENCES quote_header (quote_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT, CHECK (quantity > 0 AND list_price >= 0 AND discount < 1));
+
+CREATE TABLE sorder_body (
+    order_num INTEGER NOT NULL,
+    line_ref INTEGER,
+    item_id INTEGER NOT NULL,
+    item_desc TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    list_price FLOAT NOT NULL,
+    discount FLOAT DEFAULT 0,
+    net_price FLOAT NOT NULL,
+    line_net_total FLOAT NOT NULL,
+    lead_time INTEGER DEFAULT 1,
+    delivery_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT PENDING,
+    po_number BLOB,
+    quote_num INTEGER,
+    FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT
+)
+
+*SQL* CREATE TABLE sorder_body (order_num INTEGER NOT NULL, line_ref INTEGER, item_id INTEGER NOT NULL, item_desc TEXT NOT NULL, quantity INTEGER NOT NULL, list_price FLOAT NOT NULL, discount FLOAT DEFAULT 0, net_price FLOAT NOT NULL, line_net_total FLOAT NOT NULL, lead_time INTEGER DEFAULT 1, delivery_date DATE DEFAULT CURRENT_DATE, status TEXT DEFAULT PENDING, po_number BLOB, quote_num INTEGER, FOREIGN KEY (order_num) REFERENCES sorder_header (order_num) ON DELETE CASCADE, FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE RESTRICT);
