@@ -664,16 +664,17 @@ def convert_quote_to_sorder():
             # If there is not a perfect match, get a line with a bigger quantity. 
             # Update the first line and add a new line for pending quantity
             second_best = db.execute(
-                "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
-                int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]), 
+                "SELECT * FROM quote_body WHERE quote_num = ? AND line_ref = ? AND item_id = ? and quantity >= ? AND net_price = ? AND status = ? AND lead_time = ?",
+                int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), int(sorder_lines[i + 1]["item"]), int(sorder_lines[i + 1]["quantity"]),
                 float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
             )
             if second_best:
+                # Add a for loop to find the first line with enough quantity
                 net_total_sold = round(int(sorder_lines[i + 1]["quantity"]) * float(sorder_lines[i + 1]["net_price"]), 2)
                 db.execute(
-                    "UPDATE quote_body SET status = ?, quantity = ?, line_net_total = ?, sorder_num = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
+                    "UPDATE quote_body SET status = ?, quantity = ?, line_net_total = ?, sorder_num = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity >= ? AND net_price = ? AND status = ? AND lead_time = ? LIMIT 1",
                     "SOLD", int(sorder_lines[i + 1]["quantity"]), net_total_sold, int(sorder_header[0]["order_num"]), int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["line"]), 
-                    int(sorder_lines[i + 1]["item"]), float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
+                    int(sorder_lines[i + 1]["item"]), int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
                 )
                 remaining_quantity = second_best[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
                 net_total_pending = round(remaining_quantity * second_best[0]["net_price"], 2)
@@ -684,18 +685,20 @@ def convert_quote_to_sorder():
                     second_best[0]["net_price"], net_total_pending, second_best[0]["lead_time"]
                 )
                 continue
-            # Try a last search with no quantity and no line_ref
+            # Try a last search with no line_ref
             else:
                 last_try = db.execute(
-                    "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND lead_time = ?",
+                    "SELECT * FROM quote_body WHERE quote_num = ? AND item_id = ? AND quantity >= ? AND net_price = ? AND status = ? AND lead_time = ?",
                     int(sorder_lines[i + 1]["quote_num"]), int(sorder_lines[i + 1]["item"]), 
-                    float(sorder_lines[i + 1]["net_price"]), "PENDING", int(sorder_lines[i + 1]["lead_time"])
+                    int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["net_price"]), 
+                    "PENDING", int(sorder_lines[i + 1]["lead_time"])
                 )
                 if last_try:
                     db.execute(
-                        "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND net_price = ? AND status = ? AND sorder_num = ? AND lead_time = ? LIMIT 1",
+                        "UPDATE quote_body SET status = ? WHERE quote_num = ? AND item_id = ? AND quantity >= ? AND net_price = ? AND status = ? AND sorder_num = ? AND lead_time = ? LIMIT 1",
                         "SOLD", sorder_lines[i + 1]["quote_num"], sorder_lines[i + 1]["line"], sorder_lines[i + 1]["item"], 
-                        sorder_lines[i + 1]["net_price"], "PENDING", sorder_header[0]["order_num"], sorder_lines[i + 1]["lead_time"]
+                        int(sorder_lines[i + 1]["quantity"]), sorder_lines[i + 1]["net_price"], "PENDING", 
+                        sorder_header[0]["order_num"], sorder_lines[i + 1]["lead_time"]
                     )
                     remaining_quantity = last_try[0]["quantity"] - int(sorder_lines[i + 1]["quantity"])
                     line_net_total = remaining_quantity * last_try[0]["net_price"]
