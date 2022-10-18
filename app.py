@@ -63,6 +63,7 @@ def login():
         session["user_id"] = user[0]["id"]
         session["username"] = user[0]["username"]
         session["profile"] = user[0]["profile"]
+        session["message"] = ""
         return redirect("/")
 
 
@@ -315,13 +316,18 @@ def get_quote_details():
         header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", session["temp_variable"])
         bodies = db.execute(
         "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", session["temp_variable"]
-    )
+        )
     else:
         header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
         bodies = db.execute(
         "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", quote_id
     )
+    if not header:
+        return render_template("error.html", message="Header could not be found!")
     length = len(bodies)
+    if header[0]["blocked"] != 0:
+        message = "This quote is currently blocked by another user!!!"
+        return render_template("quote_details.html", length=length, header=header, bodies=bodies, message=message)
     return render_template("quote_details.html", length=length, header=header, bodies=bodies)
 
 
@@ -395,6 +401,13 @@ def create_quote():
 def edit_quote():
     if request.method == "POST": 
         # Will validate all user input as if this was a complete new quote
+        # Validate quote_header info (reject edition for completely SOLD quotes)
+        header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND company_name = ? AND customer_id = ? AND status != ?",
+            request.form.get("quote_num"), request.form.get("company_name"), request.form.get("customer_id"), "SOLD"
+        )
+        if not header:
+            return render_template("error.html", message="Unauthorized modification")
         data = request.form.get("data")
         if not data:
             return render_template("error.html", message="There was an unexpected error. Contact your admin")
@@ -422,13 +435,6 @@ def edit_quote():
             if not quote_lines[i+1]["list_price"] or float(quote_lines[i+1]["list_price"]) <= 0:
                 message = "Invalid price in line " + str(i+1)
                 return render_template("error.html", message=message)
-        # Validate quote_header info (reject edition for completely SOLD quotes)
-        header = db.execute(
-            "SELECT * FROM quote_header WHERE quote_num = ? AND company_name = ? AND customer_id = ? AND status != ?",
-            request.form.get("quote_num"), request.form.get("company_name"), request.form.get("customer_id"), "SOLD"
-        )
-        if not header:
-            return render_template("error.html", message="Unauthorized modification")
         # Remove all original lines from quote_body except the ones already SOLD
         db.execute(
             "DELETE FROM quote_body WHERE quote_num = ? AND status != ?", 
@@ -456,19 +462,51 @@ def edit_quote():
             "UPDATE quote_header SET total_net_value = ?, created_by = ? WHERE quote_num = ?",
             full_net_total[0]["SUM(line_net_total)"], session["username"], request.form.get("quote_num")
         )
+        
+        # Unblock the quote to allow further modifications
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(0), request.form.get("quote_num")
+        )
 
         # Send the user to the detail of the current quote
         session["temp_variable"] = request.form.get("quote_num")
         return redirect("/quote_details")
 
-    # On GET method, return edit_quote page with all information preloaded
-    header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ?", request.args.get("quote_num")
+    if request.method == "GET":
+        # Get the header from the quote. Forbid edits on fully SOLD quotes.
+        header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND status != ?", 
+            request.args.get("quote_num"), "SOLD"
+        )
+        if not header:
+            return render_template("error.html", message="Error on selected quote")
+        # Dont allow edits when quote is already blocked.
+        if header[0]["blocked"] != 0:
+            # Send the user back to the detail of the quote
+            session["temp_variable"] = request.args.get("quote_num")
+            return redirect("/quote_details") 
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(1), int(request.args.get("quote_num"))
+        )
+        bodies = db.execute(
+            "SELECT * FROM quote_body WHERE quote_num = ?", request.args.get("quote_num")
+        )
+        return render_template("edit_quote.html", header=header, bodies=bodies)
+
+
+@app.route("/unlock_quote", methods = ["POST"])
+def unlock_quote():
+    full_json = request.get_json()
+    print(full_json)
+    quote_number = int(full_json["quote_num"])
+    db.execute(
+        "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+        int(0), int(quote_number)
     )
-    bodies = db.execute(
-        "SELECT * FROM quote_body WHERE quote_num = ?", request.args.get("quote_num")
-    )
-    return render_template("edit_quote.html", header=header, bodies=bodies)
+    return
+
 
 
 @app.route("/delete_quote", methods=["GET", "POST"])

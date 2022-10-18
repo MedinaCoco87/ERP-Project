@@ -177,11 +177,12 @@ CREATE TABLE sorder_header (
     total_net_value FLOAT,
     status TEXT DEFAULT PENDING,
     created_by TEXT NOT NULL,
+    blocked INT DEFAULT 0,
     FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT,
     FOREIGN KEY (created_by) REFERENCES users (username)
 )
 
-*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, total_net_value FLOAT, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
+*SQL* CREATE TABLE sorder_header (order_num INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL DEFAULT CURRENT_DATE, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, total_net_value FLOAT, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, blocked INT DEFAULT 0, FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT, FOREIGN KEY (created_by) REFERENCES users (username));
 
 CREATE TABLE sorder_body (
     order_num INTEGER NOT NULL,
@@ -339,10 +340,11 @@ CREATE TABLE quote_header (
     total_net_value FLOAT DEFAULT 0.0,
     status TEXT DEFAULT PENDING,
     created_by TEXT NOT NULL,
+    blocked INT DEFAULT 0,
     FOREIGN KEY (customer_id) REFERENCES customers (id),
     FOREIGN KEY (created_by) REFERENCES users (username))
 
-*SQL* CREATE TABLE quote_header (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT DEFAULT 0.0, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
+*SQL* CREATE TABLE quote_header (quote_num INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL, company_name TEXT NOT NULL, date DATE DEFAULT CURRENT_DATE, total_net_value FLOAT DEFAULT 0.0, status TEXT DEFAULT PENDING, created_by TEXT NOT NULL, blocked INT DEFAULT 0, FOREIGN KEY (customer_id) REFERENCES customers (id), FOREIGN KEY (created_by) REFERENCES users (username));
 
 CREATE TABLE quote_body (
     quote_num INTEGER NOT NULL, 

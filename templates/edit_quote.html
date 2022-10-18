@@ -5,8 +5,7 @@
 {% endblock %}
 
 {% block body %}
-
-    <div id="title" class="h2 text-center">Edit Quote</div>
+    <div onunload="unlock_quote()" id="title" class="h2 text-center">Edit Quote</div>
     <form action="/edit_quote" method="post" onsubmit="gatherData()">
         <div>
             <label style="width: 110px;" for="creation_date">Creation Date:</label>
@@ -161,7 +160,22 @@
             };
         };
 
-        
+        // Send a request to unlock the quote before leaving the page
+        window.addEventListener('beforeunload', ()=> {
+            let quoteNumber = document.getElementById('quote_num').value;
+            fetch('/unlock_quote', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_num': quoteNumber}),
+                keepalive: true
+            });
+        });
+
+
     </script>
     <script src="static/source.js"></script>
 {% endblock %}
