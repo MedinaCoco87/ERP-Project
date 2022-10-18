@@ -499,13 +499,15 @@ def edit_quote():
 @app.route("/unlock_quote", methods = ["POST"])
 def unlock_quote():
     full_json = request.get_json()
+    if not full_json:
+        return render_template("error.html", message="Quote remained blocked. Contact your admin")
     print(full_json)
     quote_number = int(full_json["quote_num"])
     db.execute(
         "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
         int(0), int(quote_number)
     )
-    return
+    return jsonify({"message": "quote release succesfull"})
 
 
 
@@ -590,16 +592,27 @@ def get_quotes_by_customer_name():
 @app.route("/convert_quote_to_sorder", methods = ["GET", "POST"])
 def convert_quote_to_sorder():
     if request.method == "GET":
-        # Show the form with all data from the quote preloaded
-        quote_num = request.args.get("quote_num")
+        # Get the header from the quote. Forbid edits on fully SOLD quotes.
         header = db.execute(
-            "SELECT * FROM quote_header WHERE quote_num = ?", 
-            quote_num
+            "SELECT * FROM quote_header WHERE quote_num = ? AND status != ?", 
+            request.args.get("quote_num"), "SOLD"
+        )
+        if not header:
+            return render_template("error.html", message="Error on selected quote")
+        # Dont allow convertions when quote is already blocked.
+        if header[0]["blocked"] != 0:
+            # Send the user back to the detail of the quote
+            session["temp_variable"] = request.args.get("quote_num")
+            return redirect("/quote_details") 
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(1), int(request.args.get("quote_num"))
         )
         bodies = db.execute(
-            "SELECT * FROM quote_body WHERE quote_num = ?  and status = ? ORDER BY line_ref", 
-            quote_num, "PENDING"
+            "SELECT * FROM quote_body WHERE quote_num = ?", request.args.get("quote_num")
         )
+
+        # Show the form with all data from the quote preloaded
         return render_template("create_sorder.html", header=header, bodies=bodies)
     
     if request.method == "POST":
@@ -629,8 +642,6 @@ def convert_quote_to_sorder():
                 message = "No pending line that matches your request for item " + str(sorder_lines[i + 1]["item"]) + "." 
                 return render_template("error.html", message=message)
             # Making sure the program considers all lines that matches the query
-            # Hacer que si llega al final del loop y no encuentra una linea con la cantidad...
-            # ... suficiente, que arroje el error, pero no antes.
             for j in range(len(quote_lines)):
                 if int(quote_lines[j]["quantity"]) >= int(sorder_lines[i + 1]["quantity"]):
                     break
@@ -780,6 +791,13 @@ def convert_quote_to_sorder():
                 "PARTIAL OPEN", sorder_lines[1]["quote_num"]
             )
 
+        # Unblock the quote to allow further modifications
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(0), request.form.get("quote_num")
+        )
+
+        # Send the user to the list of sorders
         return redirect("/get_all_sorders")
 
 
@@ -1122,9 +1140,6 @@ def create_invoice_from_delivery():
     # Confirm operation success
     return jsonify({"message": "invoice created ok", "invoice_num": invoice_header[0]["invoice_num"]})
     
-
-        
-
 
 if __name__ == "__main__":
         app.run(debug=True)

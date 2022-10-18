@@ -147,6 +147,26 @@
         TaxAmountElement.setAttribute('value', taxAmount);
         let totalTaxIncludedElement = document.getElementById('total_tax_included');
         totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
+
+        let quoteNumbers = document.getElementsByClassName('quote_num');
+        let quoteNum = quoteNumbers[1];
+        console.log(quoteNum.value);
+
+        // Send a request to unlock the quote if page is closed
+        window.addEventListener('beforeunload', ()=> {
+            let listOfQuoteNumbers = document.getElementsByClassName('quote_num');
+            let quoteNumber = listOfQuoteNumbers[1].value;
+            fetch('/unlock_quote', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_num': quoteNumber}),
+                keepalive: true
+            });
+        });
     </script>
     <script src="static/source.js"></script>
 {% endblock %}
