@@ -77,7 +77,22 @@
 <form method="get" action="/" style="padding: 3px">
     <button class="btn btn-secondary" type="submit">Home</button>
 </form>
-
+<script>
+    // Send a request to unlock the quote before leaving the page
+    window.addEventListener('beforeunload', ()=> {
+            let quoteNumber = document.getElementById('quote_num').value;
+            fetch('/unlock_quote', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_num': quoteNumber}),
+                keepalive: true
+            });
+        });
+</script>
 <script src="static/source.js"></script>
 
 {% endblock %}

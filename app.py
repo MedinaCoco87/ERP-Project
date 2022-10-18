@@ -501,8 +501,13 @@ def unlock_quote():
     full_json = request.get_json()
     if not full_json:
         return render_template("error.html", message="Quote remained blocked. Contact your admin")
-    print(full_json)
     quote_number = int(full_json["quote_num"])
+    # Check the quote still exists
+    quote_header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ?", quote_number
+    )
+    if not quote_header:
+        return jsonify({"message": "quote no longer exists"})
     db.execute(
         "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
         int(0), int(quote_number)
@@ -514,30 +519,46 @@ def unlock_quote():
 @app.route("/delete_quote", methods=["GET", "POST"])
 def delete_quote():
     if request.method == "GET":
-        quote_id = request.args.get("quote_num")    
-        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+        # Get the header from the quote. Forbid deletes on fully SOLD quotes.
+        header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND status != ?", 
+            request.args.get("quote_num"), "SOLD"
+        )
+        if not header:
+            return render_template("error.html", message="Cannot delete selected quote")
+        # Dont allow edits when quote is already blocked.
+        if header[0]["blocked"] != 0:
+            # Send the user back to the detail of the quote
+            session["temp_variable"] = request.args.get("quote_num")
+            return redirect("/quote_details")
+        # If the quote is not blocked, proceed to block it for current user
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(1), int(request.args.get("quote_num"))
+        )
         bodies = db.execute(
-        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", quote_id
+        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", int(request.args.get("quote_num"))
         )
         length = len(bodies)
         return render_template("delete_quote.html", length=length, header=header, bodies=bodies)
 
-    # Validate quote_num with customer_id and with total_net_value
-    quote_header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ? AND status = ? AND total_net_value = ?",
-        request.form.get("quote_num"), request.form.get("customer_id"), "PENDING", request.form.get("total_net_value")
-    )
-    if not quote_header:
-        return render_template("error.html", message="You can't delete this quote")
-    # Delete quote from table quote_header
-    db.execute(
-        "DELETE FROM quote_body WHERE quote_num = ?", request.form.get("quote_num")
-    )
-    # Delete quote from table quote_body
-    db.execute(
-        "DELETE FROM quote_header WHERE quote_num = ?", request.form.get("quote_num")
-    )
-    return redirect("/get_quotes_list")
+    if request.method == "POST":
+        # Validate quote_num with customer_id and with total_net_value
+        quote_header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ? AND customer_id = ? AND status = ? AND total_net_value = ?",
+            request.form.get("quote_num"), request.form.get("customer_id"), "PENDING", request.form.get("total_net_value")
+        )
+        if not quote_header:
+            return render_template("error.html", message="You cannot delete this quote")
+        # Delete quote from table quote_header
+        db.execute(
+            "DELETE FROM quote_body WHERE quote_num = ?", request.form.get("quote_num")
+        )
+        # Delete quote from table quote_body
+        db.execute(
+            "DELETE FROM quote_header WHERE quote_num = ?", request.form.get("quote_num")
+        )
+        return redirect("/get_quotes_list")
 
 
 
