@@ -313,9 +313,9 @@ def get_all_quotes():
 def get_quote_details():
     quote_id = request.args.get("quote_num")
     if not quote_id:
-        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", session["temp_variable"])
+        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", session["temp_quote_num"])
         bodies = db.execute(
-        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", session["temp_variable"]
+        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", session["temp_quote_num"]
         )
     else:
         header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
@@ -470,7 +470,7 @@ def edit_quote():
         )
 
         # Send the user to the detail of the current quote
-        session["temp_variable"] = request.form.get("quote_num")
+        session["temp_quote_num"] = request.form.get("quote_num")
         return redirect("/quote_details")
 
     if request.method == "GET":
@@ -484,7 +484,7 @@ def edit_quote():
         # Dont allow edits when quote is already blocked.
         if header[0]["blocked"] != 0:
             # Send the user back to the detail of the quote
-            session["temp_variable"] = request.args.get("quote_num")
+            session["temp_quote_num"] = request.args.get("quote_num")
             return redirect("/quote_details") 
         db.execute(
             "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
@@ -529,7 +529,7 @@ def delete_quote():
         # Dont allow edits when quote is already blocked.
         if header[0]["blocked"] != 0:
             # Send the user back to the detail of the quote
-            session["temp_variable"] = request.args.get("quote_num")
+            session["temp_quote_num"] = request.args.get("quote_num")
             return redirect("/quote_details")
         # If the quote is not blocked, proceed to block it for current user
         db.execute(
@@ -623,7 +623,7 @@ def convert_quote_to_sorder():
         # Dont allow convertions when quote is already blocked.
         if header[0]["blocked"] != 0:
             # Send the user back to the detail of the quote
-            session["temp_variable"] = request.args.get("quote_num")
+            session["temp_quote_num"] = request.args.get("quote_num")
             return redirect("/quote_details") 
         db.execute(
             "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
@@ -840,18 +840,57 @@ def edit_sorder():
         if not quote_header:
             return render_template("error.html", message="Invalid customer id or quote number")
 
-    
-    
-    order_num = request.args.get("order_num")
-    if not order_num:
-        return render_template("error.html", message="Unexpected error. Contact your admin")
-    header = db.execute(
-        "SELECT * FROM sorder_header WHERE order_num = ?", order_num
-    )
-    bodies = db.execute (
-        "SELECT * FROM sorder_body WHERE order_num = ?", order_num
-    )
-    return render_template("edit_sorder.html", header=header, bodies=bodies)
+
+    if request.method == "GET":
+        order_num = request.args.get("order_num")
+        if not order_num:
+            return render_template("error.html", message="Error while getting the sorder. Contact your admin")
+        header = db.execute(
+            "SELECT * FROM sorder_header WHERE order_num = ? AND status != ?", 
+            order_num, "DELIVERED"
+        )
+        if not header:
+            return render_template("error.html", message="Forbidden action")
+        # Check sorder is not already blocked by another instance
+        if header[0]["blocked"] != 0:
+            # If so, return the user to the detail of the sorder
+            session["temp_sorder_num"] = int(order_num)
+            return redirect("/sorder_details")
+
+        # Check in sorder_body table every related quote num to make sure they arent either blocked
+        sorder_quote_nums = db.execute(
+            "SELECT DISTINCT quote_num FROM sorder_body WHERE order_num = ?", order_num
+        )
+        for i in range(len(sorder_quote_nums)):
+            quote_header = db.execute(
+                "SELECT * FROM quote_header WHERE quote_num = ?",
+                sorder_quote_nums[i]["quote_num"]
+            )
+            # Check quotes involved aren't blocked by another instance
+            if quote_header[0]["blocked"] != 0:
+                # If so, return the user to the detail of the sorder
+                session["temp_sorder_num"] = int(order_num)
+                return redirect("/sorder_details")
+        
+        # All been checked, proceed to block the sorder and all quotes involved
+        db.execute(
+            "UPDATE sorder_header SET blocked = ? WHERE order_num = ?",
+            int(1), order_num
+        )
+
+        for i in range(len(sorder_quote_nums)):
+            db.execute(
+                "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+                int(1), sorder_quote_nums[i]["quote_num"]
+            )
+        # Get all lines from sorder_body
+        bodies = db.execute (
+            "SELECT * FROM sorder_body WHERE order_num = ?", order_num
+        )
+
+        # Hand the user the page with the full table to edit the sorder as required
+        return render_template("edit_sorder.html", header=header, bodies=bodies)
+
 
 # Get all sales orders
 @app.route("/get_all_sorders", methods = ["GET"])
@@ -862,10 +901,24 @@ def get_all_sorders():
 
 @app.route("/sorder_details", methods=["GET"])
 def get_sorder_details():
-    sorder_id = request.args.get("sorder_num")
-    header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", sorder_id)
-    bodies = db.execute("SELECT * FROM sorder_body WHERE order_num = ?", sorder_id)
-    return render_template("sorder_details.html", header=header, bodies=bodies)
+    sorder_id = request.args.get("sorder_num")  
+    if not sorder_id:
+        header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", session["temp_sorder_num"])
+        bodies = db.execute(
+        "SELECT * FROM sorder_body WHERE order_num = ? ORDER BY line_ref", session["temp_sorder_num"]
+        )
+    else:
+        header = db.execute("SELECT * FROM sorder_header WHERE order_num = ?", sorder_id)
+        bodies = db.execute(
+        "SELECT * FROM sorder_body WHERE order_num = ? ORDER BY line_ref", sorder_id
+    )
+    if not header:
+        return render_template("error.html", message="Header could not be found!")
+    length = len(bodies)
+    if header[0]["blocked"] != 0:
+        message = "This sales order is currently blocked by another user!!!"
+        return render_template("sorder_details.html", length=length, header=header, bodies=bodies, message=message)
+    return render_template("sorder_details.html", length=length, header=header, bodies=bodies)
 
 
 @app.route("/get_sorder_by_id/<sorder_id>", methods = ["GET"])
