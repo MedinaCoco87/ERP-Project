@@ -303,13 +303,14 @@ function gatherDataSorder(){
     totals = document.getElementsByClassName("total");
     leadTimes = document.getElementsByClassName("lead_time");
     deliveryDates = document.getElementsByClassName("delivery_date");
+    statuses = document.getElementsByClassName("status");
     poNum = document.getElementsByClassName("po_num");
     quoteNum = document.getElementsByClassName("quote_num");
     rowFullList = [];
     for (let i = 0; i < lines.length; i++){
     rowLine = {};
-    rowLine["line"] = lines[i].value;
-    rowLine["item"] = items[i].value;
+    rowLine["line_ref"] = lines[i].value;
+    rowLine["item_id"] = items[i].value;
     rowLine["description"] = descriptions[i].value;
     rowLine["quantity"] = quantities[i].value;
     rowLine["list_price"] = listPrices[i].value;
@@ -318,6 +319,7 @@ function gatherDataSorder(){
     rowLine["total"] = totals[i].value;
     rowLine["lead_time"] = leadTimes[i].value;
     rowLine["delivery_date"] = deliveryDates[i].value;
+    rowLine["status"] = statuses[i].value;
     rowLine["po_num"] = poNum[i].value;
     if (!rowLine["po_num"]){
         rowLine["po_num"] = "0"
