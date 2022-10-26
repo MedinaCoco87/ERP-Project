@@ -612,6 +612,32 @@ def get_quotes_by_customer_name():
         return jsonify({"message": "must provide body"})
 
 
+@app.route("/get_quote_lines/<quote_num>", methods = ["GET"] )
+def get_quote_lines(quote_num):
+    quote_lines = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?",
+        int(quote_num), "PENDING"
+    )
+    if not quote_lines:
+        return jsonify({"message": "error on provided quote"})
+    return jsonify(quote_lines)
+
+@app.route("/get_quotes_list_by_customer/<customer_id>", methods=["GET"])
+def get_quotes_by_sorder(customer_id):
+    quote_headers = db.execute(
+        "SELECT * FROM quote_header WHERE customer_id = ? AND status IN (?, ?)",
+        int(customer_id), "PENDING", "PARTIAL OPEN"
+    )
+    quotes_list = []
+    if not quote_headers:
+        return jsonify(quotes_list)
+    
+    for i in range(len(quote_headers)):
+        quotes_list.append(int(quote_headers[i]["quote_num"]))
+    response = jsonify(quotes_list)
+    print(response)
+    return response 
+
 # For cases with several lines with same item, same quote_num & status PENDING...
 # ...users will have to consider max quantity per line, the ones of the quote_body in each line.
 # If users try to add up the lines and register them as one, will get exceeds quantity error.
@@ -864,7 +890,8 @@ def edit_sorder():
         set_of_quotes_nos = set(all_quotes_nos)
         list_of_quote_numbers = list(set_of_quotes_nos)
 
-        # Create a dict with all lines of the quotes involved in the current sorder
+        #: Create a dict with all lines of the quotes involved in the current sorder
+        #: and also the lines of the quotes related to the sorder before changes
         for i in range(len(list_of_quote_numbers)):
             full_quote_lines = []
             customers_quote = db.execute(
@@ -873,9 +900,10 @@ def edit_sorder():
             )
             if not customers_quote:
                 return render_template("error.html", message=f"Fatal error no quote no. {list_of_quote_numbers[i]}")
+            # First add all the quote lines previously related to the sorder
             full_quote_lines.extend(db.execute(
-                "SELECT * FROM quote_body WHERE quote_num = ? AND status = ? AND sorder_num = ?",
-                int(list_of_quote_numbers[i]), "SOLD", int(request.form.get("order_num"))
+                "SELECT * FROM quote_body WHERE status = ? AND sorder_num = ?",
+                "SOLD", int(request.form.get("order_num"))
             ))
             full_quote_lines.extend(db.execute(
                 "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?",
@@ -955,7 +983,7 @@ def edit_sorder():
                             break
         
         
-        """      
+           
         # Update the stock table by retrieving all item movs from old version of sorder
         sorder_mod_lines = db.execute(
             "SELECT * FROM sorder_body WHERE order_num = ? AND status != ?",
@@ -991,7 +1019,7 @@ def edit_sorder():
                 int(request.form.get("order_num")), int(sorder_lines[i + 1]["line_ref"]), int(sorder_lines[i + 1]["item_id"]),
                 sorder_lines[i + 1]["description"], int(sorder_lines[i + 1]["quantity"]), float(sorder_lines[i + 1]["list_price"]), 
                 float(sorder_lines[i + 1]["discount"]), net_price, line_net_total, int(sorder_lines[i + 1]["lead_time"]), 
-                sorder_lines[i + 1]["delivery_date"], order_lines[i + 1]["po_num"], int(sorder_lines[i + 1]["quote_num"])
+                sorder_lines[i + 1]["delivery_date"], sorder_lines[i + 1]["po_num"], int(sorder_lines[i + 1]["quote_num"])
             )
             # Update stock table
             item_stocks = db.execute(
@@ -1013,8 +1041,7 @@ def edit_sorder():
             "UPDATE sorder_header SET total_net_value = ? WHERE order_num = ?",
             full_net_total[0]["SUM(line_net_total)"], request.form.get("order_num")
         )
-        """
-        
+
         # Update status of quote_body lines involved
         for i in range(len(sorder_lines)-1):
             filtered_list = [d for d in full_quote_lines if d['checked'] == sorder_lines[i+1]["checked"]]
@@ -1048,16 +1075,22 @@ def edit_sorder():
             for i in range(len(filtered_list)):
                 if filtered_list[i]["status"] == "SOLD" and filtered_list[i]["sorder_num"] == int(request.form.get("order_num")):
                     db.execute(
-                        "UPDATE quote_body SET status = ?, order_num = ? WHERE WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND lead_time = ? AND status = ? AND sorder_num = ? LIMIT 1",
+                        "UPDATE quote_body SET status = ?, sorder_num = ? WHERE quote_num = ? AND line_ref = ? AND item_id = ? AND quantity = ? AND net_price = ? AND lead_time = ? AND status = ? AND sorder_num = ? LIMIT 1",
                         "PENDING", "NULL", filtered_list[i]["quote_num"], filtered_list[i]["line_ref"],
                         filtered_list[i]["item_id"], filtered_list[i]["quantity"], filtered_list[i]["net_price"],
                         filtered_list[i]["lead_time"], filtered_list[i]["status"], filtered_list[i]["sorder_num"]
                     )
-        
-        """
+        #: Update list_of_quote_numbers to include even those who were discarded in the 
+        #: current version of the sorder      
+        full_quotes_nos = []
+        for i in range(len(full_quote_lines)):
+            full_quotes_nos.append(full_quote_lines[i]["quote_num"])
+        # Get the quote_nums as a list, but with only distinct quote numbers
+        set_of_quotes_nos = set(full_quotes_nos)
+        list_of_quote_numbers = list(set_of_quotes_nos)
+
         # Update status of quote header
         # Make sure quote_body status only allows "PENDING", "SOLD", "LOST" values.
-        #FALTA CONSIDERAR LAS QUOTES QUE SE QUITARON POR COMPLETO DE LA PRESENTE SORDER
 
         for i in range(len(list_of_quote_numbers)):
             statuses = db.execute(
@@ -1097,10 +1130,18 @@ def edit_sorder():
                     "PARTIAL OPEN", int(list_of_quote_numbers[i])
                 )
     
-        # Desbloquear todas las sorders y quotes (incluir solo involucradas en version final)
-        db.execute("UPDATE quote_header SET blocked = ?", int(0))
-        db.execute("UPDATE sorder_header SET blocked = ?", int(0))
-        """
+        # Unlock all quotes affected by the sorder 
+        for i in range(len(list_of_quote_numbers)):
+            db.execute(
+                "UPDATE quote_header SET blocked = ? WHERE quote_num = ?", 
+                int(0), int(list_of_quote_numbers[i])
+            )
+        # Unlock sorder
+        db.execute(
+            "UPDATE sorder_header SET blocked = ? WHERE order_num = ?", 
+            int(0), request.form.get("order_num")
+        )
+        
 
         # Send the user to the list of sorders
         return redirect("/get_all_sorders")

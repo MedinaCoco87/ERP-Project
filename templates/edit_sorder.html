@@ -73,7 +73,7 @@
                             <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="{{ body['lead_time'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" value="{{ body['delivery_date'] }}" required></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="{{ body['po_number'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" readonly></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
                             <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                         </tr>
@@ -82,7 +82,12 @@
             </table>
         </div>
         <div>
-            <button type="button" onclick="newLine()" class="btn btn-success btn-sm" hidden>New Line</button>
+            <button onload="" id="add_quote" type="button" class="btn btn-success btn-sm">Add Quote</button>
+            <select id="quote_no_input" style="width: 100px;" hidden>
+                <option selected="selected" name="none" value="none" disabled>Quote No.</option>
+            </select>
+            <button onclick="getQuoteLines()" id="add_lines" class="btn btn-dark btn-sm" type="button" hidden>Add Lines</button>
+            <button id="add_cancel" type="button" class="btn btn-danger btn-sm" hidden>Cancel</button>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
             <label for="total_net_value">Total Net Value</label>
@@ -96,7 +101,7 @@
             <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 10px;">
-            <button class="btn btn-danger" type="submit">Register</button>
+            <button class="btn btn-secondary" type="submit">Register</button>
         </div>
     </form>
     <form method="get" action="/get_all_sorders" style="padding: 3px">
@@ -151,6 +156,44 @@
         TaxAmountElement.setAttribute('value', taxAmount);
         let totalTaxIncludedElement = document.getElementById('total_tax_included');
         totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
+
+        document.getElementById('add_quote').addEventListener('click', ()=>{
+            let quoteInput = document.getElementById('quote_no_input');
+            let addLines = document.getElementById('add_lines');
+            let addCancel = document.getElementById('add_cancel');
+            quoteInput.removeAttribute('hidden');
+            addLines.removeAttribute('hidden');
+            addCancel.removeAttribute('hidden');
+        });
+
+        document.getElementById('add_cancel').addEventListener('click', ()=>{
+            let quoteInput = document.getElementById('quote_no_input');
+            let addLines = document.getElementById('add_lines');
+            let addCancel = document.getElementById('add_cancel');;
+            quoteInput.setAttribute('hidden', '');
+            addLines.setAttribute('hidden', '');
+            addCancel.setAttribute('hidden', '');
+        });
+
+        async function getQuotesList(){
+            let customerId = document.getElementById('customer_id');
+            console.log(customerId.value);
+            let response = await fetch('/get_quotes_list_by_customer/' + customerId.value);
+            let quotesList = await response.json();
+            console.log(quotesList);
+            let select = document.getElementById('quote_no_input');
+            for (let i = 0; i < quotesList.length; i++){
+                let newChild = document.createElement('option');
+                newChild.value = quotesList[i];
+                newChild.innerText = quotesList[i];
+                select.appendChild(newChild);
+            }
+            // Add a message when the list comes empty?
+        };
+
+        getQuotesList();
+
+
     </script>
     <script src="static/source.js"></script>
 {% endblock %}

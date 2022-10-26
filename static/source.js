@@ -340,3 +340,16 @@ function gatherDataSorder(){
     dataElement.innerHTML = data;
 };
 
+async function getQuoteLines(){
+    let quoteNum = document.getElementById('quote_no_input');
+    let response = await fetch('/get_quote_lines/' + quoteNum.value);
+    let quoteLines = await response.json();
+    console.log(quoteLines);
+    // if {message} in quoteLines
+        // show message
+    // if full response
+        // for loop to add all rows below last current line
+};
+
+
+
