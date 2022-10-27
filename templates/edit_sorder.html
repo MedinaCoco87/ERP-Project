@@ -45,21 +45,21 @@
                     <tr id="template_row" hidden>
                         <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text"></td>
                         <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0" readonly></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0" readonly></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="0"></td>
                         <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text"></td>
-                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 80%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" required></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="PENDING" readonly></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" readonly></td>
+                        <td onclick="removeSorderLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                     </tr>
                 </thead>
-                <tbody id="quote_lines">
+                <tbody id="sorder_lines">
                     {% for body in bodies %}
                         <tr id="line_01">
                             <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
@@ -75,7 +75,7 @@
                             <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="{{ body['po_number'] }}"></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" readonly></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
-                            <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                            <td onclick="removeSorderLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -134,7 +134,7 @@
             listPriceInput.setAttribute('onchange', onChangeValue);
             discountInput = columns[5].firstElementChild;
             discountInput.setAttribute('onchange', onChangeValue);
-            onClickValue = "removeLine('" + rowId + "')";
+            onClickValue = "removeSorderLine('" + rowId + "')";
             columns[13].setAttribute('onclick', onClickValue);
         };
 
