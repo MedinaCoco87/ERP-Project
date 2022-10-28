@@ -161,7 +161,7 @@
         };
 
         // Send a request to unlock the quote before leaving the page
-        window.addEventListener('beforeunload', ()=> {
+        window.addEventListener('pagehide', ()=> {
             let quoteNumber = document.getElementById('quote_num').value;
             fetch('/unlock_quote', 
             {

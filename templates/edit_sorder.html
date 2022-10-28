@@ -193,6 +193,26 @@
 
         getQuotesList();
 
+        // If user leaves the page suddenly, unlock sorder and quotes involved
+        window.addEventListener('pagehide', ()=> {
+            let quoteNumCollection = document.getElementsByClassName('quote_num');
+            arrOfQuotes = []
+            for (let i = 0; i < (quoteNumCollection.length) - 1 ; i++){
+                arrOfQuotes.push(quoteNumCollection[i+1].value)   
+            }
+            quoteNumUniqArr = [...new Set(arrOfQuotes)];
+            let sorderNum = document.getElementById('order_num').value
+            fetch('/unlock_quotes_and_sorder', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_nums': quoteNumUniqArr, 'sorder_num': sorderNum}),
+                keepalive: true
+            })});
+
 
     </script>
     <script src="static/source.js"></script>

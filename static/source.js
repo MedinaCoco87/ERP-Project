@@ -126,6 +126,7 @@ customerId.addEventListener('input', async function (){
 
 async function getItem(itemId){
    let itemElement = document.getElementById(itemId).firstElementChild;
+   console.log(itemElement.value);
    let response = await fetch('/items/' + itemElement.value);
    let item = await response.json();
    // Check if a valid item_id is provided
@@ -210,7 +211,7 @@ function calculateNetPriceAndTotal(lineId){
     let discountElement = listPriceElement.nextElementSibling;
     let inputOfDiscount = discountElement.firstElementChild;
     let discount = inputOfDiscount.value;
-    if(!discount || discount < 0){
+    if(!discount || discount < 0 || discount > 100){
         discount = 0;
         inputOfDiscount.value = 0
     };
@@ -343,7 +344,18 @@ function gatherDataSorder(){
 async function getQuoteLines(){
     let quoteNum = document.getElementById('quote_no_input');
     quoteNum = quoteNum.options[quoteNum.selectedIndex].text;
-    let response = await fetch('/get_quote_lines/' + quoteNum);
+    orderNum = document.getElementById('order_num')
+    let response = await fetch('/get_quote_lines',
+    {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'quote_num': quoteNum , 'order_num': orderNum.value}),
+        keepalive: true
+    }
+    );
     let quoteLines = await response.json();
     // Get the last sorder_line
     let lastSorderLine = document.getElementById('sorder_lines').lastElementChild;
@@ -436,6 +448,13 @@ async function getQuoteLines(){
     TaxAmountElement.setAttribute('value', taxAmount);
     let totalTaxIncludedElement = document.getElementById('total_tax_included');
     totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
+    // Hide again quote_input, add_lines and add_cancel
+    let quoteInput = document.getElementById('quote_no_input');
+    let addLines = document.getElementById('add_lines');
+    let addCancel = document.getElementById('add_cancel');
+    quoteInput.setAttribute('hidden', '');
+    addLines.setAttribute('hidden', '');
+    addCancel.setAttribute('hidden', '');
 };
 
 function removeSorderLine(lineId){

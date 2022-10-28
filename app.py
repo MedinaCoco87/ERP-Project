@@ -292,7 +292,7 @@ def create_item():
 
 @app.route ("/items/<item_id>", methods = ["GET"])
 def get_item_by_id(item_id):
-    item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
+    item = db.execute("SELECT * FROM items WHERE id = ?", int(item_id))
     if not item:
         return jsonify([{"messagge": "item not found"}]), 400
     return jsonify(item), 200
@@ -504,21 +504,57 @@ def edit_quote():
 
 @app.route("/unlock_quote", methods = ["POST"])
 def unlock_quote():
-    full_json = request.get_json()
-    if not full_json:
+    quote_number = request.get_json()
+    if not quote_number:
         return render_template("error.html", message="Quote remained blocked. Contact your admin")
-    quote_number = int(full_json["quote_num"])
+    print(quote_number)
     # Check the quote still exists
     quote_header = db.execute(
-        "SELECT * FROM quote_header WHERE quote_num = ?", quote_number
+        "SELECT * FROM quote_header WHERE quote_num = ?", int(quote_number["quote_num"])
     )
     if not quote_header:
         return jsonify({"message": "quote no longer exists"})
     db.execute(
         "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
-        int(0), int(quote_number)
+        int(0), int(quote_number["quote_num"])
     )
     return jsonify({"message": "quote release succesfull"})
+
+
+
+@app.route("/unlock_quotes_and_sorder", methods = ["POST"])
+def unlock_quotes_and_sorder():
+    # This json includes a list of quote_numbers and a dictionary with the order_num.
+    full_json = request.get_json()
+    if not full_json:
+        return render_template("error.html", message="Quote remained blocked. Contact your admin")
+    print(full_json)
+    quote_nums = full_json["quote_nums"]
+    # Iterate the list of quote_numbers
+    for i in range(len(quote_nums)):
+        # Check the quote still exists
+        quote_header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ?", int(quote_nums[i])
+        )
+        if not quote_header:
+            return jsonify({"message": "quote no longer exists"})
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(0), int(quote_nums[i])
+        )
+    # Check sorder still exists
+    sorder_header = db.execute(
+        "SELECT * FROM sorder_header WHERE order_num = ?", int(full_json["sorder_num"])
+    )
+    if not sorder_header:
+        return jsonify({"message": "sorder no longer exists"})
+    # Unlock sorder
+    db.execute(
+        "UPDATE sorder_header SET blocked = ? WHERE order_num = ?",
+        int(0), int(full_json["sorder_num"])
+    )
+    return jsonify({"message": "quotes and sorder released succesfully"})
+
 
 
 
@@ -612,15 +648,84 @@ def get_quotes_by_customer_name():
         return jsonify({"message": "must provide body"})
 
 
-@app.route("/get_quote_lines/<quote_num>", methods = ["GET"] )
-def get_quote_lines(quote_num):
+@app.route("/get_quote_lines", methods = ["POST"] )
+def get_quote_lines():
+    full_json = request.get_json()
+    # Check if requested quote number was included in the last version of sorder
+    sorder_header = db.execute(
+        "SELECT * FROM sorder_header WHERE order_num = ?", int(full_json["order_num"])
+    )
+    if not sorder_header:
+        return jsonify({"message": "Error on sales order"})
+    sorder_body = db.execute(
+        "SELECT * FROM sorder_body WHERE quote_num = ? AND order_num = ?", 
+        int(full_json["quote_num"]), int(full_json["order_num"])
+    )
+    # Path for quotes not included in the last version of sorder
+    if not sorder_body:
+        quote_header = db.execute(
+            "SELECT * FROM quote_header WHERE quote_num = ?", int(full_json["quote_num"]) 
+        )
+        if not quote_header:
+            return jsonify({"message": "Error on provided quote"})
+        if quote_header[0]["customer_id"] != sorder_header[0]["customer_id"]:
+            return jsonify({"message": "Error on sorder/quote number"})
+        if quote_header[0]["blocked"] != 0:
+            return jsonify({"message": "This quote is blocked by another user"})
+        # Block this quote for other users
+        db.execute(
+            "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+            int(1), int(full_json["quote_num"])
+        )
+        quote_lines = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?",
+        int(full_json["quote_num"]), "PENDING"
+        )
+        if not quote_lines:
+            return jsonify({"message": "Error on provided quote"})
+        return jsonify(quote_lines)
+
+    # Path for quotes already included in the sorder
+    quote_header = db.execute(
+        "SELECT * FROM quote_header WHERE quote_num = ?", int(full_json["quote_num"])
+    )
+    if not quote_header:
+        return jsonify({"message": "Error on provided quote"})
+    if quote_header[0]["customer_id"] != sorder_header[0]["customer_id"]:
+        return jsonify({"message": "Error on sorder/quote number"})    
+    if quote_header[0]["blocked"] != 1:
+        return jsonify({"message": "This quote is blocked by another user"})
+    # Block this quote for other users
+    db.execute(
+        "UPDATE quote_header SET blocked = ? WHERE quote_num = ?",
+        int(2), int(full_json["quote_num"])
+    )
+    quote_lines = db.execute(
+    "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?",
+    int(full_json["quote_num"]), "PENDING"
+    )
+    if not quote_lines:
+        return jsonify({"message": "Error on provided quote"})
+    return jsonify(quote_lines)
+     
+
+
+
+
+
+    
+    
+        # If it was, allow to proceed if status blocked == 1.
+        # If it wasn't allow to proceed if status blocked == 0.
+    # Get only the lines of the quote in status "PENDING"
     quote_lines = db.execute(
         "SELECT * FROM quote_body WHERE quote_num = ? AND status = ?",
-        int(quote_num), "PENDING"
+        int(full_json["quote_num"]), "PENDING"
     )
     if not quote_lines:
         return jsonify({"message": "error on provided quote"})
     return jsonify(quote_lines)
+
 
 @app.route("/get_quotes_list_by_customer/<customer_id>", methods=["GET"])
 def get_quotes_by_sorder(customer_id):
