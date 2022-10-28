@@ -86,14 +86,13 @@
         <div>
             <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
         </div>
-        <div style="display: flex; justify-content: flex-end; margin: 10px;">
-            <button type="submit">Edit</button>
-            <!-- Add class="btn btn-outline-danger" when route fully implemented-->
+        <div style="padding: 3px">
+            <button class="btn btn-outline-danger" type="submit">Edit</button>
         </div>
     </form>
     <form method="get" action="/sorder_to_delivery" style="padding: 3px">
         <input type="text" name="order_num" value="{{ header[0]['order_num'] }}" hidden>
-        <button type="submit">Delivery</button>
+        <button type="submit">Deliver</button>
         <!-- Add class="btn btn-danger" when route fully implemented-->
     </form>
     <form method="get" action="/get_all_sorders" style="padding: 3px">

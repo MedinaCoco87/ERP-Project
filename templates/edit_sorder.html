@@ -6,15 +6,15 @@
 
 {% block body %}
 
-    <div id="title" class="h2 text-center">Create Sales Order</div>
-    <form action="/convert_quote_to_sorder" method="post" onsubmit="gatherDataSorder()">
+    <div id="title" class="h2 text-center">Edit Sales Order</div>
+    <form action="/edit_sorder" method="post" onsubmit="gatherDataSorder()">
         <div>
             <label style="width: 110px;" for="creation_date">Date:</label>
             <input id="current_date" type="date" style="width: 110px;" disabled>
         </div>
         <div>
             <label style="width: 110px;" for="quote_id">Sorder No:</label>
-            <input type="text" name="order_num" id="order_num" style="width: 110px;" readonly>
+            <input type="text" name="order_num" id="order_num" style="width: 110px;" value="{{ header[0]['order_num'] }}" readonly>
         </div>
         <div class="flex-container" style="margin-bottom: 5px;">
             <label style="width: 110px;" for="customer_id">Customer ID:</label>
@@ -29,35 +29,37 @@
                     <tr style="width: 100%">
                         <td style="width: 3%">Line</td>
                         <td style="width: 6%">Item</td>
-                        <td style="width: 36%">Description</td>
+                        <td style="width: 35%">Description</td>
                         <td style="width: 4%">Q</td>
-                        <td style="width: 6%">List Price</td>
+                        <td style="width: 5%">Price</td>
                         <td style="width: 6%">Discount</td>
-                        <td style="width: 6%">Net Price</td>
+                        <td style="width: 5%">Net</td>
                         <td style="width: 7%">Total</td>
                         <td hidden>Lead Time</td>
-                        <td style="width: 9%">Delivery Date</td>
-                        <td style="width: 7%">PO</td>
+                        <td style="width: 8%">Due Date</td>
+                        <td style="width: 5%">PO</td>
+                        <td style="width: 6%">Status</td>
                         <td style="width: 5%">Quote</td>
-                        <td style="min-width: 4%"></td>
+                        <td style="width: 5%"></td>
                     </tr>
                     <tr id="template_row" hidden>
                         <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text"></td>
                         <td id="item_" style="padding: 0.5px; margin: 1px"><input class="item" oninput="getItem('item_01')" style="width: 100%;" type="text"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="description" style="width: 100%;" type="text" readonly></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="quantity" onchange="calculateTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="list_price" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0" readonly></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="discount" onchange="calculateNetPriceAndTotal('line_01')" style="width: 100%;" type="text" value="0" readonly></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" disabled value="0"></td>
                         <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="0"></td>
                         <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="0"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date"></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value=""></td>
-                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value=""></td>
-                        <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" required></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="0"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="PENDING" readonly></td>
+                        <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" readonly></td>
+                        <td onclick="removeSorderLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                     </tr>
                 </thead>
-                <tbody id="quote_lines">
+                <tbody id="sorder_lines">
                     {% for body in bodies %}
                         <tr id="line_01">
                             <td style="text-align: right; padding: 0.5px; margin: 1px"><input class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}"></td>
@@ -69,17 +71,23 @@
                             <td style="padding: 0.5px; margin: 1px"><input class="net_price" style="width: 100%;" type="text" value="{{ '%.2f'|format(body['list_price'] * (1 - body['discount'])) }}" disabled></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
                             <td hidden style="padding: 0.5px; margin: 1px"><input class="lead_time" style="width: 100%;" type="text" disabled value="{{ body['lead_time'] }}"></td>
-                            <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" required></td>
-                            <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="delivery_date" style="width: 100%;" type="date" value="{{ body['delivery_date'] }}" required></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="po_num" style="width: 100%;" type="text" value="{{ body['po_number'] }}"></td>
+                            <td style="padding: 0.5px; margin: 1px"><input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" readonly></td>
                             <td style="padding: 0.5px; margin: 1px"><input class="quote_num" style="width: 100%;" type="text" value="{{ body['quote_num'] }}" readonly></td>
-                            <td onclick="removeLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
+                            <td onclick="removeSorderLine('line_01')" style="padding: 0.5px; margin: 1px"><button type="button" style="width: 100%" class="btn btn-outline-danger btn-sm">Remove</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <div>
-            <button type="button" onclick="newLine()" class="btn btn-success btn-sm" hidden>New Line</button>
+            <button onload="" id="add_quote" type="button" class="btn btn-success btn-sm">Add Quote</button>
+            <select id="quote_no_input" style="width: 100px;" hidden>
+                <option selected="selected" name="none" value="none" disabled>Quote No.</option>
+            </select>
+            <button onclick="getQuoteLines()" id="add_lines" class="btn btn-dark btn-sm" type="button" hidden>Add Lines</button>
+            <button id="add_cancel" type="button" class="btn btn-danger btn-sm" hidden>Cancel</button>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
             <label for="total_net_value">Total Net Value</label>
@@ -93,15 +101,16 @@
             <textarea hidden name="data" id="data" cols="30" rows="10"></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 10px;">
-            <button class="btn btn-danger" type="submit">Create</button>
+            <button class="btn btn-secondary" type="submit">Register</button>
         </div>
     </form>
-    <form method="get" action="/get_quotes_list" style="padding: 3px">
-        <button class="btn btn-warning" type="submit">Back to Quotes</button>
+    <form method="get" action="/get_all_sorders" style="padding: 3px">
+        <button class="btn btn-warning" type="submit">Back to Orders</button>
     </form>
     <form method="get" action="/" style="padding: 3px">
         <button class="btn btn-secondary" type="submit">Home</button>
     </form>
+
     <script>
         // Corrects all id's and in-function line_references
         tbody = document.querySelector('tbody');
@@ -125,8 +134,8 @@
             listPriceInput.setAttribute('onchange', onChangeValue);
             discountInput = columns[5].firstElementChild;
             discountInput.setAttribute('onchange', onChangeValue);
-            onClickValue = "removeLine('" + rowId + "')";
-            columns[12].setAttribute('onclick', onClickValue);
+            onClickValue = "removeSorderLine('" + rowId + "')";
+            columns[13].setAttribute('onclick', onClickValue);
         };
 
         // This section will update grand totals on page onload.
@@ -148,9 +157,63 @@
         let totalTaxIncludedElement = document.getElementById('total_tax_included');
         totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
 
-        let quoteNumbers = document.getElementsByClassName('quote_num');
-        let quoteNum = quoteNumbers[1];
-        console.log(quoteNum.value);
+        document.getElementById('add_quote').addEventListener('click', ()=>{
+            let quoteInput = document.getElementById('quote_no_input');
+            let addLines = document.getElementById('add_lines');
+            let addCancel = document.getElementById('add_cancel');
+            quoteInput.removeAttribute('hidden');
+            addLines.removeAttribute('hidden');
+            addCancel.removeAttribute('hidden');
+        });
+
+        document.getElementById('add_cancel').addEventListener('click', ()=>{
+            let quoteInput = document.getElementById('quote_no_input');
+            let addLines = document.getElementById('add_lines');
+            let addCancel = document.getElementById('add_cancel');;
+            quoteInput.setAttribute('hidden', '');
+            addLines.setAttribute('hidden', '');
+            addCancel.setAttribute('hidden', '');
+        });
+
+        async function getQuotesList(){
+            let customerId = document.getElementById('customer_id');
+            console.log(customerId.value);
+            let response = await fetch('/get_quotes_list_by_customer/' + customerId.value);
+            let quotesList = await response.json();
+            console.log(quotesList);
+            let select = document.getElementById('quote_no_input');
+            for (let i = 0; i < quotesList.length; i++){
+                let newChild = document.createElement('option');
+                newChild.value = quotesList[i];
+                newChild.innerText = quotesList[i];
+                select.appendChild(newChild);
+            }
+            // Add a message when the list comes empty?
+        };
+
+        getQuotesList();
+
+        // If user leaves the page suddenly, unlock sorder and quotes involved
+        window.addEventListener('pagehide', ()=> {
+            let quoteNumCollection = document.getElementsByClassName('quote_num');
+            arrOfQuotes = []
+            for (let i = 0; i < (quoteNumCollection.length) - 1 ; i++){
+                arrOfQuotes.push(quoteNumCollection[i+1].value)   
+            }
+            quoteNumUniqArr = [...new Set(arrOfQuotes)];
+            let sorderNum = document.getElementById('order_num').value
+            fetch('/unlock_quotes_and_sorder', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_nums': quoteNumUniqArr, 'sorder_num': sorderNum}),
+                keepalive: true
+            })});
+
+
     </script>
     <script src="static/source.js"></script>
 {% endblock %}
