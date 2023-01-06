@@ -216,7 +216,7 @@ def get_customer_by_id(customer_id):
     return jsonify(customer), 200
     
 
-@app.route("/customers/", methods = ["GET"])
+@app.route("/get_customers/", methods = ["GET"])
 @login_required
 def get_customers():
     customers = db.execute("SELECT * FROM customers")
@@ -726,9 +726,11 @@ def get_quote_lines():
         return jsonify({"message": "error on provided quote"})
     return jsonify(quote_lines)
 
+"""
+VER QUE HACE ESTA FUNCION Y POR QUE LA TENGO DUPLICADA
 
 @app.route("/get_quotes_list_by_customer/<customer_id>", methods=["GET"])
-def get_quotes_by_sorder(customer_id):
+def get_quotes_by_customer(customer_id):
     quote_headers = db.execute(
         "SELECT * FROM quote_header WHERE customer_id = ? AND status IN (?, ?)",
         int(customer_id), "PENDING", "PARTIAL OPEN"
@@ -742,6 +744,7 @@ def get_quotes_by_sorder(customer_id):
     response = jsonify(quotes_list)
     print(response)
     return response 
+"""
 
 # For cases with several lines with same item, same quote_num & status PENDING...
 # ...users will have to consider max quantity per line, the ones of the quote_body in each line.
@@ -1326,7 +1329,7 @@ def get_sorder_details():
         "SELECT * FROM sorder_body WHERE order_num = ? ORDER BY line_ref", sorder_id
     )
     if not header:
-        return render_template("error.html", message="Header could not be found!")
+        return render_template("error.html", message="ERROR 404: Header could not be found!")
     length = len(bodies)
     if header[0]["blocked"] != 0:
         message = "This sales order is currently blocked by another user!!!"

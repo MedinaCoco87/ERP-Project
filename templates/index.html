@@ -5,46 +5,147 @@
 {% endblock %}
 
 {% block body %}
-    <div style="padding-left: 10px; padding-top: 5px;">
-        <h3>Welcome to CDM!</h3>
-        <p>We manage your deals</p>
-    </div>
-    <div style="padding-left: 10px;">
-        <form method="get" action="/logout" style="padding: 2px;">
-            <button class="btn btn-danger" type="submit">Log Out</button>
-        </form>
-        <form method="get" action="/change_password" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Change Password</button>
-        </form>
-        <form method="get" action="/users" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Users</button>
-        </form>
-        <form method="get" action="/customers" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Customers</button>
-        </form>
-        <form method="get" action="/get_item_categories" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Categories</button>
-        </form>
-        <form method="get" action="/get_items" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Items</button>
-        </form>
-        <form method="get" action="/current_stock" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Stock</button>
-        </form>
-        <form method="get" action="/stock_movement" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Stock Movements</button>
-        </form>
-        <form method="get" action="/get_quotes_list" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Quotes</button>
-        </form>
-        <form method="get" action="/get_all_sorders" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Sales Orders</button>
-        </form>
-        <form method="get" action="/list_of_deliveries" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Deliveries</button>
-        </form>
-        <form method="get" action="/get_all_invoices" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Invoices</button>
-        </form>
-    </div>
+    <div class="page-title">Home</div>
+    <section class="index-main">
+        <aside id="index-menu">
+            <div id="settings" onclick="showOptions('settings')" type="button" class="index-menu-button">Settings</div>
+            <div id="settings-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/logout">
+                            <button class="index-option-button" type="submit"> - Log Out</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/change_password">
+                            <button class="index-option-button" type="submit"> - Change Password</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="data" onclick="showOptions('data')" class="index-menu-button">Data</button>
+            <div id="data-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/users">
+                            <button class="index-option-button" type="submit">Users</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/get_customers">
+                            <button class="index-option-button" type="submit">Customers</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/get_item_categories">
+                            <button class="index-option-button" type="submit">Categories</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/get_items">
+                            <button class="index-option-button" type="submit">Items</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="stock" onclick="showOptions('stock')" class="index-menu-button">Stock</button>
+            <div id="stock-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/current_stock">
+                            <button class="index-option-button" type="submit">Current Stock</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/stock_movement">
+                            <button class="index-option-button" type="submit">Stock Movements</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/">
+                            <button class="index-option-button" type="submit">Stock Adjustment</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="quotes" onclick="showOptions('quotes')" class="index-menu-button">Quotes</button>
+            <div id="quotes-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/get_quotes_list">
+                            <button class="index-option-button" type="submit">List of Quotes</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form method="get" action="/create_quote">
+                            <button class="index-option-button" type="submit">Create Quote</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="sorders" onclick="showOptions('sorders')" class="index-menu-button">Sales Orders</button>
+            <div id="sorders-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/get_all_sorders">
+                            <button class="index-option-button" type="submit">Sales Orders</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="deliveries" onclick="showOptions('deliveries')" class="index-menu-button">Deliveries</button>
+            <div class="deliveries-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/list_of_deliveries">
+                            <button class="index-option-button" type="submit">List of Deliveries</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <button id="invoices" onclick="showOptions('invoices')" class="index-menu-button">Invoices</button>
+            <div class="invoices-options">
+                <ul hidden>
+                    <li>
+                        <form method="get" action="/get_all_invoices">
+                            <button class="index-option-button" type="submit">Invoices</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        <article id="index-article">
+                <div class="list settings" hidden>
+                    <a href="/logout" class="btn btn-dark btn-square-md">LOG OUT</a>
+                    <a href="/change_password" class="btn btn-dark btn-square-md">CHANGE PASSWORD</a>
+                </div>
+                <div class="list data" hidden>
+                    <a href="/users" class="btn btn-dark btn-square-md">USERS</a>
+                    <a href="/get_customers" class="btn btn-dark btn-square-md">CUSTOMERS</a>
+                    <a href="get_item_categories" class="btn btn-dark btn-square-md">CATEGORIES</a>
+                    <a href="/get_items" class="btn btn-dark btn-square-md">ITEMS</a>
+                </div>
+                <div class="list stock" hidden>
+                    <a href="/current_stock" class="btn btn-dark btn-square-md">CURRENT STOCK</a>
+                    <a href="/stock_movement" class="btn btn-dark btn-square-md">STOCK MOVEMENTS</a>
+                    <a href="/" class="btn btn-dark btn-square-md">STOCK ADJUSTMENT</a>
+                </div>
+                <div class="list quotes" hidden>
+                    <a href="/get_quotes_list" class="btn btn-dark btn-square-md">LIST OF QUOTES</a>
+                    <a href="/create_quote" class="btn btn-dark btn-square-md"> CREATE QUOTE</a>
+                </div>
+                <div class="list sorders" hidden>
+                    <a href="/get_all_sorders" class="btn btn-dark btn-square-md">LIST OF SALES ORDERS</a>
+                </div>
+                <div class="list deliveries" hidden>
+                    <a href="/list_of_deliveries" class="btn btn-dark btn-square-md">LIST OF DELIVERIES</a>
+                </div>
+                <div class="list invoices">
+                    <a href="/get_all_invoices" class="btn btn-dark btn-square-md">LIST OF INVOICES</a>
+                </div>
+        </article>
+        <script src="/static/source.js"></script>
+    </section>
+    
+    
 {% endblock %}

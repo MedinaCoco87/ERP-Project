@@ -488,5 +488,19 @@ function removeSorderLine(lineId){
     }
 };
 
+function showOptions(elementId){
+    triger = document.getElementById(elementId);
+    optionsDiv = triger.nextElementSibling;
+    console.log(optionsDiv);
+    optionsUl = optionsDiv.firstElementChild;
+    alreadyHid = optionsUl.hasAttribute('hidden');
+    if (alreadyHid){
+        optionsUl.removeAttribute('hidden');
+    } else {
+        optionsUl.setAttribute('hidden', '');
+    }
+    
+};
+
 
 

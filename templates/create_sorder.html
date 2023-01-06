@@ -6,7 +6,7 @@
 
 {% block body %}
 
-    <div id="title" class="h2 text-center">Create Sales Order</div>
+    <div id="title" class="page title">Create Sales Order</div>
     <form action="/convert_quote_to_sorder" method="post" onsubmit="gatherDataSorder()">
         <div>
             <label style="width: 110px;" for="creation_date">Date:</label>
@@ -148,9 +148,21 @@
         let totalTaxIncludedElement = document.getElementById('total_tax_included');
         totalTaxIncludedElement.setAttribute('value', totalTaxIncluded);
 
-        let quoteNumbers = document.getElementsByClassName('quote_num');
-        let quoteNum = quoteNumbers[1];
-        console.log(quoteNum.value);
+        // Send a request to unlock the quote before leaving the page
+        window.addEventListener('pagehide', ()=> {
+            let quoteNumbers = document.getElementsByClassName('quote_num');
+            let quoteNum = quoteNumbers[1];
+            fetch('/unlock_quote', 
+            {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'quote_num': quoteNum.value}),
+                keepalive: true
+            });
+        });
     </script>
     <script src="static/source.js"></script>
 {% endblock %}

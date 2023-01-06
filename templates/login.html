@@ -5,18 +5,21 @@
 {% endblock %}
 
 {% block body %}
-<div style="padding-left: 20px; padding-top: 5px;">
-    <h3>Welcome to CDM!</h3>
-    <p>We manage your deals</p>
-</div>
-<div class="h4" style="padding-left: 20px; padding-top: 5px;">Log In</div>   
-<form action="/login" method="post" style="padding-left: 20px">
-    <div class="mb-3" style="padding-top: 20px">
-        <input autocomplete="off" autofocus class="form-control" id="username" name="username" placeholder="Username" style="max-width: 200px;" type="text">
-    </div>
-    <div class="mb-3">
-        <input class="form-control" id="password" name="password" placeholder="Password" style="max-width: 200px;" type="password">
-    </div>
-    <button class="btn btn-primary mx-auto w-auto" type="submit">Log In</button>
-</form>
+<article class="login-body">
+    <aside class="login-aside">
+        <div>
+            <h3>Welcome to CDM!</h3>
+            <p>We manage your deals</p>
+        </div> 
+        <form class="login-form" action="/login" method="post">
+            <div>
+                <input autocomplete="off" autofocus id="username" name="username" placeholder="Username" type="text">
+            </div>
+            <div>
+                <input id="password" name="password" placeholder="Password" type="password">
+            </div>
+            <button class="login-button" type="submit">Log In</button>
+        </form>
+    </aside>
+</article>
 {% endblock %}
