@@ -5,11 +5,12 @@ import os
 
 import json
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, make_response
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from auxiliary import login_required
 from operator import itemgetter
+import pdfkit
 
 
 # Configuring flask app
@@ -335,6 +336,33 @@ def get_quote_details():
         message = "This quote is currently blocked by another user!!!"
         return render_template("quote_details.html", length=length, header=header, bodies=bodies, message=message)
     return render_template("quote_details.html", length=length, header=header, bodies=bodies)
+
+@app.route("/get_quote_pdf", methods=["GET"])
+def get_quote_pdf():
+    quote_id = request.args.get("quote_num")
+    if not quote_id:
+        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", session["temp_quote_num"])
+        bodies = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", session["temp_quote_num"]
+        )
+    else:
+        header = db.execute("SELECT * FROM quote_header WHERE quote_num = ?", quote_id)
+        bodies = db.execute(
+        "SELECT * FROM quote_body WHERE quote_num = ? ORDER BY line_ref", quote_id
+    )
+    if not header:
+        return render_template("error.html", message="Header could not be found!")
+    length = len(bodies)
+    if header[0]["blocked"] != 0:
+        message = "This quote is currently blocked by another user!!!"
+        return render_template("quote_details.html", length=length, header=header, bodies=bodies, message=message)
+    rendered = render_template("pdf_quote.html", length=length, header=header, bodies=bodies)
+    pdf = pdfkit.from_string(rendered, False)
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = "inline; filename=quote"+quote_id+".pdf"
+    return response
+
 
 
 # Pending implementation in frontend

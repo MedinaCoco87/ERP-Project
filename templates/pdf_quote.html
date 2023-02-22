@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+</head>
+<body>
+    <div style="margin-bottom: 5px;" id="title" class="page-title">
+        <b>Quote Details</b>
+    </div>
+    <div>
+        <span style="width: 110px;">Date:</span>
+        <span id="creation_date" style="width: 110px;">{{ header[0]['date'] }}</span>
+    </div>
+    <div>
+        <span style="width: 110px;">Quote No:</span>
+        <span id="quote_num" style="width: 110px;">{{ header[0]['quote_num'] }}</span>
+    </div>
+    <div class="flex-container">
+        <span style="width: 110px;">Customer ID:</span>
+        <span id="customer_id" style="width: 110px;">{{ header[0]['customer_id'] }}</span>
+    </div>
+    <div style="margin-bottom: 5px;">
+        <span style="width: 120px;">Company Name:</span>
+        <span style="width: 200px;" id="company_name">{{ header[0]['company_name'] }}</span>
+    </div>
+    <!-- This one below is the div of the table-->
+    <div>
+        <table class="table" style="table-layout: fixed; width: 100%; margin-bottom: 5px;">
+            <thead class="table-primary text-center" style="width: 100%">
+                <tr style="width: 100%; border: solid black 1px;">
+                    <td style="width: 5%">Line</td>
+                    <td style="width: 9%">Item</td>
+                    <td style="width: 40%">Description</td>
+                    <td style="width: 8%">Quantity</td>
+                    <td style="width: 9%">Net Price</td>
+                    <td style="width: 10%">Lead Time</td>
+                    <td style="width: 9%">Status</td>
+                    <td style="width: 10%">Total</td>
+                </tr>
+            </thead>
+            <tbody id="quote_lines">
+                {% for body in bodies %}
+                    <tr>
+                        <td style="text-align: right; padding: 0.5px; margin: 1px"><input name="line[]" class="line" style="width: 100%; text-align: center" type="text" value="{{ body['line_ref'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="item[]" class="item" style="width: 100%;" type="text" value="{{ body['item_id'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="description[]" class="description" style="width: 100%;" type="text" value="{{ body['item_desc'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="quantity[]" class="quantity" style="width: 100%;" type="text" value="{{ body['quantity'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="net_price[]" class="net_price" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['list_price'] * (1 - body['discount'])) }}"></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="lead_time[]" class="lead_time" style="width: 100%;" type="text" value="{{ body['lead_time'] }} DAYS" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="status[]" input class="status" style="width: 100%;" type="text" value="{{ body['status'] }}" disabled></td>
+                        <td style="padding: 0.5px; margin: 1px"><input name="total[]" class="total" style="width: 100%;" type="text" disabled value="{{ '%.2f'|format(body['line_net_total']) }}"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+        <span style="text-align: left;">Total Net Value</span>
+        <span style="margin-left: 10px;" id="total_net_value">{{ '%.2f'|format(header[0]['total_net_value']) }}</span>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+        <span style="text-align: left; margin-right: 5px;">Tax Amount</span>
+        <span style="margin-left: 10px;" id="tax_amount">{{ '%.2f'|format(header[0]['total_net_value'] * 0.18) }}</span>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin: 10px;">
+        <span style="margin-left: 10px;">Total Tax Included</span>
+        <span style="margin-left: 10px;" id="total_tax_included">{{ '%.2f'|format(header[0]['total_net_value'] + (header[0]['total_net_value'] * 0.18)) }}</span>
+    </div>
+    <script src="static/source.js"></script>    
+</body>
+</html>

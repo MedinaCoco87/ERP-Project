@@ -72,6 +72,10 @@
         <button class="btn btn-outline-danger" type="submit">Edit</button>
     </div>
 </form>
+<form method="get" action="/get_quote_pdf" style="padding: 3px">
+    <input type="text" name="quote_num" value="{{ header[0]['quote_num'] }}" hidden>
+    <button class="btn btn-danger" type="submit">Get PDF</button>
+</form>
 <form method="get" action="/convert_quote_to_sorder" style="padding: 3px">
     <input type="text" name="quote_num" value="{{ header[0]['quote_num'] }}" hidden>
     <button class="btn btn-danger" type="submit">Convert</button>
