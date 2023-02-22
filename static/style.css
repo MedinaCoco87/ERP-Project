@@ -115,27 +115,11 @@ body {
     padding-left: 10px;
 }
 
+/*
 .index-menu-button:hover{
-    transform: translateY(-5px);
-    font-weight: bold;
-    /*background-color: rgb(57, 57, 150);*/
-    background-color: #198754;
+    background-color: #b6bbb9;
     color: white;
-}
-
-.index-option-button{
-    width: 100%;
-    color: black;
-    background-color: white;
-    border: solid 1px whitesmoke;
-    text-align: left;
-    font-size: medium;
-    padding-left: 50px;
-}
-
-.index-option-button:hover{
-    text-decoration: underline;
-}
+}*/
 
 #index-article{
     /*height: 50%;*/

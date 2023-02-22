@@ -8,139 +8,41 @@
     <div class="page-title">Home</div>
     <section class="index-main">
         <aside id="index-menu">
-            <div id="settings" onclick="showOptions('settings')" type="button" class="index-menu-button">Settings</div>
-            <div id="settings-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/logout">
-                            <button class="index-option-button" type="submit"> - Log Out</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/change_password">
-                            <button class="index-option-button" type="submit"> - Change Password</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="data" onclick="showOptions('data')" class="index-menu-button">Data</button>
-            <div id="data-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/users">
-                            <button class="index-option-button" type="submit">Users</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/get_customers">
-                            <button class="index-option-button" type="submit">Customers</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/get_item_categories">
-                            <button class="index-option-button" type="submit">Categories</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/get_items">
-                            <button class="index-option-button" type="submit">Items</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="stock" onclick="showOptions('stock')" class="index-menu-button">Stock</button>
-            <div id="stock-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/current_stock">
-                            <button class="index-option-button" type="submit">Current Stock</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/stock_movement">
-                            <button class="index-option-button" type="submit">Stock Movements</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/">
-                            <button class="index-option-button" type="submit">Stock Adjustment</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="quotes" onclick="showOptions('quotes')" class="index-menu-button">Quotes</button>
-            <div id="quotes-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/get_quotes_list">
-                            <button class="index-option-button" type="submit">List of Quotes</button>
-                        </form>
-                    </li>
-                    <li>
-                        <form method="get" action="/create_quote">
-                            <button class="index-option-button" type="submit">Create Quote</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="sorders" onclick="showOptions('sorders')" class="index-menu-button">Sales Orders</button>
-            <div id="sorders-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/get_all_sorders">
-                            <button class="index-option-button" type="submit">Sales Orders</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="deliveries" onclick="showOptions('deliveries')" class="index-menu-button">Deliveries</button>
-            <div class="deliveries-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/list_of_deliveries">
-                            <button class="index-option-button" type="submit">List of Deliveries</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <button id="invoices" onclick="showOptions('invoices')" class="index-menu-button">Invoices</button>
-            <div class="invoices-options">
-                <ul hidden>
-                    <li>
-                        <form method="get" action="/get_all_invoices">
-                            <button class="index-option-button" type="submit">Invoices</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
+            <button id="settings" onclick="showOptions(this)" class="index-menu-button"><i class="fa-sharp fa-solid fa-gears"></i> &nbsp;Settings</button>
+            <button id="data" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-database"></i> &nbsp;&nbsp;Data</button>
+            <button id="stock" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-boxes-stacked"></i>&nbsp; Stock</button>
+            <button id="quotes" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-clipboard"></i>&nbsp;&nbsp; Quotes</button>
+            <button id="sorders" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-chart-line"></i>&nbsp;&nbsp;Sales Orders</button>
+            <button id="deliveries" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-truck"></i>&nbsp; Deliveries</button>
+            <button id="invoices" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-file-invoice-dollar"></i>&nbsp;&nbsp; Invoices</button>
         </aside>
         <article id="index-article">
-                <div class="list settings" hidden>
+                <div class="list" id="settings_options" hidden>
                     <a href="/logout" class="btn btn-dark btn-square-md">LOG OUT</a>
                     <a href="/change_password" class="btn btn-dark btn-square-md">CHANGE PASSWORD</a>
                 </div>
-                <div class="list data" hidden>
+                <div class="list" id="data_options" hidden>
                     <a href="/users" class="btn btn-dark btn-square-md">USERS</a>
                     <a href="/get_customers" class="btn btn-dark btn-square-md">CUSTOMERS</a>
                     <a href="get_item_categories" class="btn btn-dark btn-square-md">CATEGORIES</a>
                     <a href="/get_items" class="btn btn-dark btn-square-md">ITEMS</a>
                 </div>
-                <div class="list stock" hidden>
+                <div class="list" id="stock_options" hidden>
                     <a href="/current_stock" class="btn btn-dark btn-square-md">CURRENT STOCK</a>
                     <a href="/stock_movement" class="btn btn-dark btn-square-md">STOCK MOVEMENTS</a>
                     <a href="/" class="btn btn-dark btn-square-md">STOCK ADJUSTMENT</a>
                 </div>
-                <div class="list quotes" hidden>
+                <div class="list" id="quotes_options" hidden>
                     <a href="/get_quotes_list" class="btn btn-dark btn-square-md">LIST OF QUOTES</a>
                     <a href="/create_quote" class="btn btn-dark btn-square-md"> CREATE QUOTE</a>
                 </div>
-                <div class="list sorders" hidden>
+                <div class="list" id="sorders_options" hidden>
                     <a href="/get_all_sorders" class="btn btn-dark btn-square-md">LIST OF SALES ORDERS</a>
                 </div>
-                <div class="list deliveries" hidden>
+                <div class="list" id="deliveries_options" hidden>
                     <a href="/list_of_deliveries" class="btn btn-dark btn-square-md">LIST OF DELIVERIES</a>
                 </div>
-                <div class="list invoices">
+                <div class="list" id="invoices_options" hidden>
                     <a href="/get_all_invoices" class="btn btn-dark btn-square-md">LIST OF INVOICES</a>
                 </div>
         </article>
