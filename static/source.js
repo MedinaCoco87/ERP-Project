@@ -488,5 +488,65 @@ function removeSorderLine(lineId){
     }
 };
 
+// IndexPage
+
+// Restart all the CSS of the side menu to inactive mode.
+function hideOptions(){
+    document.querySelector('#settings_options').setAttribute('hidden', 'hidden');
+    let settings = document.getElementById('settings');
+    settings.style.fontWeight = 'normal';
+    settings.style.backgroundColor = 'white';
+    settings.style.color = 'black';
+    document.querySelector('#data_options').setAttribute('hidden', 'hidden');
+    let data = document.getElementById('data');
+    data.style.fontWeight = 'normal';
+    data.style.backgroundColor = 'white';
+    data.style.color = 'black';
+    document.querySelector('#stock_options').setAttribute('hidden', 'hidden');
+    let stock = document.getElementById('stock');
+    stock.style.fontWeight = 'normal';
+    stock.style.backgroundColor = 'white';
+    stock.style.color = 'black';
+    document.querySelector('#quotes_options').setAttribute('hidden', 'hidden');
+    let quotes = document.getElementById('quotes');
+    quotes.style.fontWeight = 'normal';
+    quotes.style.backgroundColor = 'white';
+    quotes.style.color = 'black';
+    document.querySelector('#sorders_options').setAttribute('hidden', 'hidden');
+    let sorders = document.getElementById('sorders');
+    sorders.style.fontWeight = 'normal';
+    sorders.style.backgroundColor = 'white';
+    sorders.style.color = 'black';
+    document.querySelector('#deliveries_options').setAttribute('hidden', 'hidden');
+    let deliveries = document.getElementById('deliveries');
+    deliveries.style.fontWeight = 'normal';
+    deliveries.style.backgroundColor = 'white';
+    deliveries.style.color = 'black';
+    document.querySelector('#invoices_options').setAttribute('hidden', 'hidden');
+    let invoices = document.getElementById('invoices');
+    invoices.style.fontWeight = 'normal';
+    invoices.style.backgroundColor = 'white';
+    invoices.style.color = 'black';
+};
+// Shows additional submenu options from homepage
+function showOptions(element){
+    hideOptions();
+    // Apply CSS to show whats the active selected menu
+    element.style.backgroundColor = '#198754';
+    element.style.fontWeight = 'bold';
+    element.style.color = 'white';
+    // Show boxes with additional sub menu
+    let option = element.id + '_options';
+    let optionElement = document.getElementById(option);
+    optionElement.removeAttribute('hidden');
+};
+
+
+function hideHeader(){
+    header = document.querySelector('header');
+    console.log(header);
+    header.style.display = 'None';
+};
+
 
 

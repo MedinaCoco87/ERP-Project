@@ -5,46 +5,49 @@
 {% endblock %}
 
 {% block body %}
-    <div style="padding-left: 10px; padding-top: 5px;">
-        <h3>Welcome to CDM!</h3>
-        <p>We manage your deals</p>
-    </div>
-    <div style="padding-left: 10px;">
-        <form method="get" action="/logout" style="padding: 2px;">
-            <button class="btn btn-danger" type="submit">Log Out</button>
-        </form>
-        <form method="get" action="/change_password" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Change Password</button>
-        </form>
-        <form method="get" action="/users" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Users</button>
-        </form>
-        <form method="get" action="/customers" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Customers</button>
-        </form>
-        <form method="get" action="/get_item_categories" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Categories</button>
-        </form>
-        <form method="get" action="/get_items" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Items</button>
-        </form>
-        <form method="get" action="/current_stock" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Stock</button>
-        </form>
-        <form method="get" action="/stock_movement" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Stock Movements</button>
-        </form>
-        <form method="get" action="/get_quotes_list" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Quotes</button>
-        </form>
-        <form method="get" action="/get_all_sorders" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Sales Orders</button>
-        </form>
-        <form method="get" action="/list_of_deliveries" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Deliveries</button>
-        </form>
-        <form method="get" action="/get_all_invoices" style="padding: 2px;">
-            <button class="btn btn-primary" type="submit">Invoices</button>
-        </form>
-    </div>
+    <div class="page-title">Home</div>
+    <section class="index-main">
+        <aside id="index-menu">
+            <button id="settings" onclick="showOptions(this)" class="index-menu-button"><i class="fa-sharp fa-solid fa-gears"></i> &nbsp;Settings</button>
+            <button id="data" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-database"></i> &nbsp;&nbsp;Data</button>
+            <button id="stock" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-boxes-stacked"></i>&nbsp; Stock</button>
+            <button id="quotes" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-clipboard"></i>&nbsp;&nbsp; Quotes</button>
+            <button id="sorders" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-chart-line"></i>&nbsp;&nbsp;Sales Orders</button>
+            <button id="deliveries" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-truck"></i>&nbsp; Deliveries</button>
+            <button id="invoices" onclick="showOptions(this)" class="index-menu-button"><i class="fa-solid fa-file-invoice-dollar"></i>&nbsp;&nbsp; Invoices</button>
+        </aside>
+        <article id="index-article">
+                <div class="list" id="settings_options" hidden>
+                    <a href="/logout" class="btn btn-dark btn-square-md">LOG OUT</a>
+                    <a href="/change_password" class="btn btn-dark btn-square-md">CHANGE PASSWORD</a>
+                </div>
+                <div class="list" id="data_options" hidden>
+                    <a href="/users" class="btn btn-dark btn-square-md">USERS</a>
+                    <a href="/get_customers" class="btn btn-dark btn-square-md">CUSTOMERS</a>
+                    <a href="get_item_categories" class="btn btn-dark btn-square-md">CATEGORIES</a>
+                    <a href="/get_items" class="btn btn-dark btn-square-md">ITEMS</a>
+                </div>
+                <div class="list" id="stock_options" hidden>
+                    <a href="/current_stock" class="btn btn-dark btn-square-md">CURRENT STOCK</a>
+                    <a href="/stock_movement" class="btn btn-dark btn-square-md">STOCK MOVEMENTS</a>
+                    <a href="/" class="btn btn-dark btn-square-md">STOCK ADJUSTMENT</a>
+                </div>
+                <div class="list" id="quotes_options" hidden>
+                    <a href="/get_quotes_list" class="btn btn-dark btn-square-md">LIST OF QUOTES</a>
+                    <a href="/create_quote" class="btn btn-dark btn-square-md"> CREATE QUOTE</a>
+                </div>
+                <div class="list" id="sorders_options" hidden>
+                    <a href="/get_all_sorders" class="btn btn-dark btn-square-md">LIST OF SALES ORDERS</a>
+                </div>
+                <div class="list" id="deliveries_options" hidden>
+                    <a href="/list_of_deliveries" class="btn btn-dark btn-square-md">LIST OF DELIVERIES</a>
+                </div>
+                <div class="list" id="invoices_options" hidden>
+                    <a href="/get_all_invoices" class="btn btn-dark btn-square-md">LIST OF INVOICES</a>
+                </div>
+        </article>
+        <script src="/static/source.js"></script>
+    </section>
+    
+    
 {% endblock %}

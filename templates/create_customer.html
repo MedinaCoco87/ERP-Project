@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="h4" style="padding-left:10px; padding-top: 10px;">New customer</div>
+<div class="page-title">New customer</div>
 <div style="padding: 10px">
     <form action="/create_customer" method="post">
         <div>
@@ -27,7 +27,7 @@
         </div>  
     </form>
 </div>
-<form method="get" action="/customers" style="padding-left: 10px;">
+<form method="get" action="/get_customers" style="padding-left: 10px;">
     <button class="btn btn-warning" type="submit">Back to Customers</button>
 </form>
 <form method="get" action="/" style="padding-left: 10px; margin-top: 5px;">
